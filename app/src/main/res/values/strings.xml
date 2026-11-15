@@ -81,6 +81,4 @@
     <string name="status_rejected">Rejected</string>
     <string name="contact_role_agent">Agent</string>
     <string name="contact_role_owner">Owner</string>
-    <string name="home_empty_title">No hunts yet</string>
-    <string name="home_empty_body">Create a collection to start cataloging the flats you visit.</string>
 </resources>
