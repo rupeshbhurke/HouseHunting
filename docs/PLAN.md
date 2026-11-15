@@ -5,8 +5,8 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 
 | Milestone | Status | Branch |
 |---|---|---|
-| M0 — Project scaffold | ⏸ awaiting approval | `main` |
-| M1 — Collections & entries (template-driven) | ⬜ | `m1-collections-entries` |
+| M0 — Project scaffold | ✅ done | `main` |
+| M1 — Collections & entries (template-driven) | ⏸ awaiting approval | `m1-collections-entries` |
 | M2 — GPS for the flat | ⬜ | `m2-gps` |
 | M3 — Photo & video capture | ⬜ | `m3-capture` |
 | M4 — Notes: text, audio, video | ⬜ | `m4-notes` |
@@ -53,7 +53,7 @@ While house hunting it is hard to keep track of each flat you see. Your own phot
 | `Collection` | id, name (e.g. "Pune Hunt 2026"), templateId, `extraFieldDefs` (JSON: fields promoted to "all flats" in this collection), createdAt |
 | `EntryFieldDef` | entryId, key, label, type — custom fields that belong to a single flat only |
 | `ReferencePoint` | id, collectionId?, name (Office, Kids' school), lat, lng |
-| `Entry` | id, collectionId, title, lat, lng, accuracyM, address, status, rating, createdAt, updatedAt |
+| `Entry` | id, collectionId, title, lat, lng, accuracyM, status, rating, createdAt, updatedAt (the address is the template field `address`) |
 | `FieldValue` | entryId, fieldKey, textValue, numValue (typed columns so filters and compare can query them) |
 | `Contact` | id, entryId, role (Agent/Owner), name, phone |
 | `Attachment` | id, entryId, kind (PHOTO/VIDEO/AUDIO), filePath, mime, lat, lng, capturedAt, source (CAPTURED/IMPORTED), caption, durationMs |
@@ -83,7 +83,7 @@ Fields in the House Hunt template:
 
 ## Milestones
 
-### M0 — Project scaffold ⏸
+### M0 — Project scaffold ✅
 - [x] Gradle project with a version catalog (AGP 8.13, Kotlin 2.2, Gradle 8.14.3 wrapper)
 - [x] Compose + Material 3, Hilt, Room/KSP, kotlinx-serialization, and Secrets plugin configured
 - [x] App theme, Hilt `Application`, `MainActivity`, navigation shell with home screen
@@ -93,15 +93,19 @@ Fields in the House Hunt template:
 
 > Note: Room's `@Database` class arrives with the first entities in M1 (Room needs at least one entity to compile).
 
-### M1 — Collections & entries (template-driven) ⬜
-- [ ] Room entities/DAOs for the generic core + database class
-- [ ] Seed House Hunt template
-- [ ] Collections list: create, rename, delete
-- [ ] Entry list cards (thumbnail, title, status, price, rating)
-- [ ] Entry detail + edit form from the effective field list (all optional, blanks hidden)
-- [ ] + Add field per flat, with "Add to all flats"
-- [ ] Contacts with tap-to-call / WhatsApp
-- [ ] DAO/repository unit tests
+### M1 — Collections & entries (template-driven) ⏸
+- [x] Room entities/DAOs for the generic core + database class
+- [x] Seed House Hunt template (upserted from code when a collection is created)
+- [x] Collections list: create, rename, delete
+- [x] Entry list cards (title, BHK, price, status, rating; photo thumbnail comes with M3)
+- [x] Entry detail + edit form from the effective field list (all optional, blanks hidden)
+- [x] + Add field per flat, with "Add to all flats"
+- [x] Contacts with tap-to-call / WhatsApp
+- [x] Unit tests for field resolution/formatting; instrumented repository tests (in-memory Room)
+- [x] Instrumented tests (10) run green on an emulator
+- [x] Manual walkthrough on an emulator: create collection, add flat, set status/rating/price, add custom field to all flats, add contact, call button opens the dialer
+
+> Decisions made in M1: `address` is a template field (stored as a field value) rather than an `Entry` column, so M2's reverse-geocoded address will be written into that field. Amounts display with ₹ and Indian digit grouping. WhatsApp links assume +91 for 10-digit numbers.
 
 ### M2 — GPS for the flat ⬜
 - [ ] Location permission flow
