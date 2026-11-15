@@ -37,7 +37,7 @@ class EntryRepositoryTest {
         entries = EntryRepository(
             db, db.entryDao(), db.collectionDao(), db.templateDao(),
             db.entryFieldDefDao(), db.fieldValueDao(), db.contactDao(),
-            db.attachmentDao(), mediaFiles,
+            db.attachmentDao(), db.noteDao(), mediaFiles,
         )
     }
 
@@ -108,6 +108,40 @@ class EntryRepositoryTest {
         val entry = entries.getDetail(entryId).entry
         assertEquals(19.0, entry.lat!!, 0.0)
         assertNull(entry.accuracyM)
+    }
+
+    @Test
+    fun summaries_carryValuesAndSearchTextCoveringEveryField() = runBlocking {
+        val collectionId = collections.create("Pune")
+        val entryId = entries.createEntry(collectionId)
+        val parking = entries.addCustomField(entryId, "Parking", FieldType.TEXT, emptyList(), addToAll = false)
+        entries.saveEntry(entryId, "Sunrise Apts", EntryStatus.SHORTLISTED, 4, mapOf(Keys.PRICE to "28000", parking to "Covered"))
+        entries.addContact(entryId, ContactRole.AGENT, "Sharma", "98765 43210")
+
+        val row = entries.observeSummaries(collectionId).first().single()
+
+        assertEquals(28000.0, row.values.getValue(Keys.PRICE).numValue!!, 0.0)
+        listOf("sunrise", "shortlisted", "parking: covered", "28,000", "28000", "sharma", "98765").forEach {
+            assertTrue("missing '$it' in ${row.searchText}", it in row.searchText)
+        }
+    }
+
+    @Test
+    fun fields_listTemplateSharedAndEveryFlatsOwnCustomFields() = runBlocking {
+        val collectionId = collections.create("Pune")
+        val first = entries.createEntry(collectionId)
+        val second = entries.createEntry(collectionId)
+        entries.addCustomField(first, "Water supply", FieldType.TEXT, emptyList(), addToAll = true)
+        entries.addCustomField(first, "Parking", FieldType.TEXT, emptyList(), addToAll = false)
+        entries.addCustomField(second, "Pet friendly", FieldType.TEXT, emptyList(), addToAll = false)
+
+        val keys = entries.observeFields(collectionId).first().map { it.key }
+
+        assertTrue(Keys.PRICE in keys)
+        assertTrue("custom_water_supply" in keys)
+        assertTrue("custom_parking" in keys)
+        assertTrue("custom_pet_friendly" in keys)
+        assertEquals(keys.distinct(), keys)
     }
 
     @Test

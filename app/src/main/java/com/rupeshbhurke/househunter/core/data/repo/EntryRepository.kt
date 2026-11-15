@@ -13,6 +13,7 @@ import com.rupeshbhurke.househunter.core.data.db.EntryEntity
 import com.rupeshbhurke.househunter.core.data.db.EntryFieldDefDao
 import com.rupeshbhurke.househunter.core.data.db.EntryFieldDefEntity
 import com.rupeshbhurke.househunter.core.data.db.FieldValueDao
+import com.rupeshbhurke.househunter.core.data.db.NoteDao
 import com.rupeshbhurke.househunter.core.data.db.FieldValueEntity
 import com.rupeshbhurke.househunter.core.data.db.TemplateDao
 import com.rupeshbhurke.househunter.core.data.model.ContactRole
@@ -60,6 +61,10 @@ data class EntrySummary(
     val bhk: String?,
     /** First photo or video of the flat, if any, for the list thumbnail. */
     val cover: AttachmentEntity? = null,
+    /** Every stored value of the flat by field key, for filtering and comparing. */
+    val values: Map<String, FieldValueEntity> = emptyMap(),
+    /** Lower-case text of everything about the flat, for free-text search. */
+    val searchText: String = "",
 )
 
 @Singleton
@@ -72,25 +77,57 @@ class EntryRepository @Inject constructor(
     private val fieldValueDao: FieldValueDao,
     private val contactDao: ContactDao,
     private val attachmentDao: AttachmentDao,
+    private val noteDao: NoteDao,
     private val mediaFiles: MediaFiles,
 ) {
-    fun observeSummaries(collectionId: Long): Flow<List<EntrySummary>> =
-        combine(
+    fun observeSummaries(collectionId: Long): Flow<List<EntrySummary>> {
+        val core = combine(
             entryDao.observeByCollection(collectionId),
             fieldValueDao.observeByCollection(collectionId),
             attachmentDao.observeVisualMediaByCollection(collectionId),
-        ) { entries, values, media ->
-            val byEntry = values.groupBy { it.entryId }
-            val coverByEntry = media.groupBy { it.entryId }
+        ) { entries, values, media -> Triple(entries, values, media) }
+        val extra = combine(
+            contactDao.observeByCollection(collectionId),
+            noteDao.observeByCollection(collectionId),
+            observeFields(collectionId),
+        ) { contacts, notes, fields -> Triple(contacts, notes, fields) }
+
+        return combine(core, extra) { (entries, values, media), (contacts, notes, fields) ->
+            val defs = fields.associateBy { it.key }
+            val valuesByEntry = values.groupBy { it.entryId }
+            val mediaByEntry = media.groupBy { it.entryId }
+            val contactsByEntry = contacts.groupBy { it.entryId }
+            val notesByEntry = notes.groupBy { it.entryId }
             entries.map { entry ->
-                val v = byEntry[entry.id].orEmpty().associateBy { it.fieldKey }
+                val own = valuesByEntry[entry.id].orEmpty()
+                val byKey = own.associateBy { it.fieldKey }
+                val entryMedia = mediaByEntry[entry.id].orEmpty()
                 EntrySummary(
                     entry = entry,
-                    price = v[HouseHuntTemplate.Keys.PRICE]?.numValue,
-                    bhk = v[HouseHuntTemplate.Keys.BHK]?.textValue,
-                    cover = coverByEntry[entry.id]?.firstOrNull(),
+                    price = byKey[HouseHuntTemplate.Keys.PRICE]?.numValue,
+                    bhk = byKey[HouseHuntTemplate.Keys.BHK]?.textValue,
+                    cover = entryMedia.firstOrNull(),
+                    values = byKey,
+                    searchText = SearchText.build(
+                        entry = entry,
+                        defs = defs,
+                        values = own,
+                        contacts = contactsByEntry[entry.id].orEmpty(),
+                        notes = notesByEntry[entry.id].orEmpty(),
+                        captions = entryMedia.mapNotNull { it.caption },
+                    ),
                 )
             }
+        }
+    }
+
+    /** Every field that exists in the collection: the template's, the shared extras and each flat's own. */
+    fun observeFields(collectionId: Long): Flow<List<FieldDef>> =
+        combine(
+            collectionDao.observe(collectionId).filterNotNull(),
+            fieldDefDao.observeByCollection(collectionId),
+        ) { collection, ownDefs ->
+            resolve(collection, ownDefs).map { it.def }
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)

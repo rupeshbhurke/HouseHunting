@@ -45,7 +45,7 @@ class MediaImporterTest {
         val collections = CollectionRepository(db.collectionDao(), db.templateDao(), db.entryDao(), files)
         val entries = EntryRepository(
             db, db.entryDao(), db.collectionDao(), db.templateDao(),
-            db.entryFieldDefDao(), db.fieldValueDao(), db.contactDao(), db.attachmentDao(), files,
+            db.entryFieldDefDao(), db.fieldValueDao(), db.contactDao(), db.attachmentDao(), db.noteDao(), files,
         )
         entryId = entries.createEntry(collections.create("Pune"))
     }

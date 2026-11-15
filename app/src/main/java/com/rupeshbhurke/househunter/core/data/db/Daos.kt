@@ -88,6 +88,12 @@ interface EntryFieldDefDao {
     @Query("SELECT * FROM entry_field_defs WHERE entryId = :entryId ORDER BY id")
     suspend fun get(entryId: Long): List<EntryFieldDefEntity>
 
+    @Query(
+        "SELECT d.* FROM entry_field_defs d JOIN entries e ON e.id = d.entryId " +
+            "WHERE e.collectionId = :collectionId ORDER BY d.id",
+    )
+    fun observeByCollection(collectionId: Long): Flow<List<EntryFieldDefEntity>>
+
     @Insert
     suspend fun insert(def: EntryFieldDefEntity)
 }
@@ -113,6 +119,11 @@ interface FieldValueDao {
 interface ContactDao {
     @Query("SELECT * FROM contacts WHERE entryId = :entryId ORDER BY id")
     fun observe(entryId: Long): Flow<List<ContactEntity>>
+
+    @Query(
+        "SELECT c.* FROM contacts c JOIN entries e ON e.id = c.entryId WHERE e.collectionId = :collectionId",
+    )
+    fun observeByCollection(collectionId: Long): Flow<List<ContactEntity>>
 
     @Insert
     suspend fun insert(contact: ContactEntity)
@@ -157,6 +168,9 @@ interface AttachmentDao {
 interface NoteDao {
     @Query("SELECT * FROM notes WHERE entryId = :entryId ORDER BY createdAt DESC, id DESC")
     fun observe(entryId: Long): Flow<List<NoteEntity>>
+
+    @Query("SELECT n.* FROM notes n JOIN entries e ON e.id = n.entryId WHERE e.collectionId = :collectionId")
+    fun observeByCollection(collectionId: Long): Flow<List<NoteEntity>>
 
     @Insert
     suspend fun insert(note: NoteEntity): Long

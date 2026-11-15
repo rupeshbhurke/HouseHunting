@@ -37,7 +37,7 @@ class NoteRepositoryTest {
         collections = CollectionRepository(db.collectionDao(), db.templateDao(), db.entryDao(), files)
         entries = EntryRepository(
             db, db.entryDao(), db.collectionDao(), db.templateDao(),
-            db.entryFieldDefDao(), db.fieldValueDao(), db.contactDao(), db.attachmentDao(), files,
+            db.entryFieldDefDao(), db.fieldValueDao(), db.contactDao(), db.attachmentDao(), db.noteDao(), files,
         )
         notes = NoteRepository(db.noteDao(), db.attachmentDao(), files)
         media = MediaRepository(db.attachmentDao(), files)
