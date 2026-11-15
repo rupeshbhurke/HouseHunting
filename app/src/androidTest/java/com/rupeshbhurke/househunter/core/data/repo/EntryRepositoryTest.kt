@@ -11,6 +11,7 @@ import com.rupeshbhurke.househunter.core.data.model.FieldScope
 import com.rupeshbhurke.househunter.core.data.model.FieldType
 import com.rupeshbhurke.househunter.core.data.model.HouseHuntTemplate
 import com.rupeshbhurke.househunter.core.data.model.HouseHuntTemplate.Keys
+import com.rupeshbhurke.househunter.core.media.MediaFiles
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
@@ -31,10 +32,12 @@ class EntryRepositoryTest {
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java).build()
-        collections = CollectionRepository(db.collectionDao(), db.templateDao())
+        val mediaFiles = MediaFiles(context)
+        collections = CollectionRepository(db.collectionDao(), db.templateDao(), db.entryDao(), mediaFiles)
         entries = EntryRepository(
             db, db.entryDao(), db.collectionDao(), db.templateDao(),
             db.entryFieldDefDao(), db.fieldValueDao(), db.contactDao(),
+            db.attachmentDao(), mediaFiles,
         )
     }
 

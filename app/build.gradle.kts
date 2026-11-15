@@ -40,6 +40,8 @@ android {
         compose = true
         buildConfig = true
     }
+    // Exported Room schemas let the migration test open old database versions.
+    sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
 }
 
 kotlin {
@@ -83,6 +85,16 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.play.services.location)
+
+    implementation(libs.androidx.camera.core)
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+    implementation(libs.androidx.camera.video)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.coil.compose)
+    implementation(libs.coil.video)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

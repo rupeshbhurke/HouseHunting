@@ -4,9 +4,11 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.rupeshbhurke.househunter.core.data.model.AttachmentKind
 import com.rupeshbhurke.househunter.core.data.model.ContactRole
 import com.rupeshbhurke.househunter.core.data.model.EntryStatus
 import com.rupeshbhurke.househunter.core.data.model.FieldType
+import com.rupeshbhurke.househunter.core.data.model.MediaSource
 
 @Entity(tableName = "templates")
 data class TemplateEntity(
@@ -91,4 +93,30 @@ data class ContactEntity(
     val role: ContactRole,
     val name: String,
     val phone: String,
+)
+
+/**
+ * A photo, video or recording of a flat. [filePath] is relative to the app's files folder.
+ * [isNote] marks files that belong to a note (shown in the notes timeline, not the media strip).
+ */
+@Entity(
+    tableName = "attachments",
+    foreignKeys = [
+        ForeignKey(EntryEntity::class, ["id"], ["entryId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index("entryId")],
+)
+data class AttachmentEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val entryId: Long,
+    val kind: AttachmentKind,
+    val filePath: String,
+    val mime: String,
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val capturedAt: Long,
+    val source: MediaSource,
+    val caption: String? = null,
+    val durationMs: Long? = null,
+    val isNote: Boolean = false,
 )

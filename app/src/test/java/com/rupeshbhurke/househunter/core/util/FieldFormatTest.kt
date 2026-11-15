@@ -58,6 +58,14 @@ class FieldFormatTest {
     }
 
     @Test
+    fun duration_showsMinutesAndSecondsAndHoursOnlyWhenNeeded() {
+        assertEquals("0:00", FieldFormat.duration(0))
+        assertEquals("0:12", FieldFormat.duration(12_400))
+        assertEquals("1:05", FieldFormat.duration(65_000))
+        assertEquals("1:02:03", FieldFormat.duration(3_723_000))
+    }
+
+    @Test
     fun whatsAppNumber_assumesIndiaForTenDigitNumbers() {
         assertEquals("919876543210", ContactActions.whatsAppNumber("98765 43210"))
     }

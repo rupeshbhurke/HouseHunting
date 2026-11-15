@@ -36,6 +36,20 @@ object FieldFormat {
         DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale)
             .format(Instant.ofEpochMilli(millis).atZone(ZoneOffset.UTC))
 
+    /** "1:05" for 65 seconds, "1:02:03" past an hour. */
+    fun duration(millis: Long): String {
+        val total = millis / 1_000
+        val h = total / 3_600
+        val m = (total % 3_600) / 60
+        val sec = total % 60
+        return if (h > 0) "%d:%02d:%02d".format(h, m, sec) else "%d:%02d".format(m, sec)
+    }
+
+    /** Local date and time of an instant, e.g. for when a photo was taken. */
+    fun dateTime(millis: Long, locale: Locale = Locale.getDefault()): String =
+        DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(locale)
+            .format(Instant.ofEpochMilli(millis).atZone(java.time.ZoneId.systemDefault()))
+
     /** Human-readable value for display, or null when there is nothing to show. */
     fun display(type: FieldType, text: String?, number: Double?): String? = when (type) {
         FieldType.NUMBER -> number?.let(::number)

@@ -1,5 +1,6 @@
 package com.rupeshbhurke.househunter.core.data.db
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
@@ -11,8 +12,10 @@ import androidx.room.RoomDatabase
         EntryFieldDefEntity::class,
         FieldValueEntity::class,
         ContactEntity::class,
+        AttachmentEntity::class,
     ],
-    version = 1,
+    version = 2,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
     exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -22,4 +25,5 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun entryFieldDefDao(): EntryFieldDefDao
     abstract fun fieldValueDao(): FieldValueDao
     abstract fun contactDao(): ContactDao
+    abstract fun attachmentDao(): AttachmentDao
 }

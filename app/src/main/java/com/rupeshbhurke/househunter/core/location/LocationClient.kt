@@ -41,6 +41,13 @@ class LocationClient @Inject constructor(
         null
     }
 
+    /** The last position the device knows, instantly; null if none or no permission. */
+    suspend fun lastKnownFix(): Fix? = try {
+        lastKnown()?.toFix()
+    } catch (_: SecurityException) {
+        null
+    }
+
     @SuppressLint("MissingPermission")
     private suspend fun lastKnown(): Location? =
         suspendCancellableCoroutine { cont -> fused.lastLocation.resumeWith(cont) }

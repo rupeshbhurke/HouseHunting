@@ -61,6 +61,9 @@ interface EntryDao {
     @Query("SELECT * FROM entries WHERE id = :id")
     suspend fun get(id: Long): EntryEntity?
 
+    @Query("SELECT id FROM entries WHERE collectionId = :collectionId")
+    suspend fun idsInCollection(collectionId: Long): List<Long>
+
     @Query("SELECT COUNT(*) FROM entries WHERE collectionId = :collectionId")
     suspend fun countInCollection(collectionId: Long): Int
 
@@ -119,4 +122,30 @@ interface ContactDao {
 
     @Delete
     suspend fun delete(contact: ContactEntity)
+}
+
+@Dao
+interface AttachmentDao {
+    @Query("SELECT * FROM attachments WHERE entryId = :entryId AND isNote = 0 ORDER BY capturedAt, id")
+    fun observeMedia(entryId: Long): Flow<List<AttachmentEntity>>
+
+    /** Every photo and video of the collection, oldest first; the list uses the first per flat as its cover. */
+    @Query(
+        "SELECT a.* FROM attachments a JOIN entries e ON e.id = a.entryId " +
+            "WHERE e.collectionId = :collectionId AND a.isNote = 0 AND a.kind IN ('PHOTO', 'VIDEO') " +
+            "ORDER BY a.capturedAt, a.id",
+    )
+    fun observeVisualMediaByCollection(collectionId: Long): Flow<List<AttachmentEntity>>
+
+    @Query("SELECT * FROM attachments WHERE id = :id")
+    suspend fun get(id: Long): AttachmentEntity?
+
+    @Insert
+    suspend fun insert(attachment: AttachmentEntity): Long
+
+    @Query("UPDATE attachments SET caption = :caption WHERE id = :id")
+    suspend fun setCaption(id: Long, caption: String?)
+
+    @Query("DELETE FROM attachments WHERE id = :id")
+    suspend fun delete(id: Long)
 }

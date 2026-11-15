@@ -51,3 +51,7 @@ enum class ContactRole(@StringRes val labelRes: Int) {
     AGENT(R.string.contact_role_agent),
     OWNER(R.string.contact_role_owner),
 }
+
+enum class AttachmentKind { PHOTO, VIDEO, AUDIO }
+
+enum class MediaSource { CAPTURED, IMPORTED }

@@ -2,6 +2,8 @@ package com.rupeshbhurke.househunter.core.data.repo
 
 import androidx.room.withTransaction
 import com.rupeshbhurke.househunter.core.data.db.AppDatabase
+import com.rupeshbhurke.househunter.core.data.db.AttachmentDao
+import com.rupeshbhurke.househunter.core.data.db.AttachmentEntity
 import com.rupeshbhurke.househunter.core.data.db.CollectionDao
 import com.rupeshbhurke.househunter.core.data.db.CollectionEntity
 import com.rupeshbhurke.househunter.core.data.db.ContactDao
@@ -22,6 +24,7 @@ import com.rupeshbhurke.househunter.core.data.model.FieldScope
 import com.rupeshbhurke.househunter.core.data.model.FieldType
 import com.rupeshbhurke.househunter.core.data.model.HouseHuntTemplate
 import com.rupeshbhurke.househunter.core.data.model.ScopedField
+import com.rupeshbhurke.househunter.core.media.MediaFiles
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -48,12 +51,15 @@ data class EntryDetail(
     val entry: EntryEntity,
     val fields: List<FieldEntry>,
     val contacts: List<ContactEntity>,
+    val attachments: List<AttachmentEntity> = emptyList(),
 )
 
 data class EntrySummary(
     val entry: EntryEntity,
     val price: Double?,
     val bhk: String?,
+    /** First photo or video of the flat, if any, for the list thumbnail. */
+    val cover: AttachmentEntity? = null,
 )
 
 @Singleton
@@ -65,19 +71,24 @@ class EntryRepository @Inject constructor(
     private val fieldDefDao: EntryFieldDefDao,
     private val fieldValueDao: FieldValueDao,
     private val contactDao: ContactDao,
+    private val attachmentDao: AttachmentDao,
+    private val mediaFiles: MediaFiles,
 ) {
     fun observeSummaries(collectionId: Long): Flow<List<EntrySummary>> =
         combine(
             entryDao.observeByCollection(collectionId),
             fieldValueDao.observeByCollection(collectionId),
-        ) { entries, values ->
+            attachmentDao.observeVisualMediaByCollection(collectionId),
+        ) { entries, values, media ->
             val byEntry = values.groupBy { it.entryId }
+            val coverByEntry = media.groupBy { it.entryId }
             entries.map { entry ->
                 val v = byEntry[entry.id].orEmpty().associateBy { it.fieldKey }
                 EntrySummary(
                     entry = entry,
                     price = v[HouseHuntTemplate.Keys.PRICE]?.numValue,
                     bhk = v[HouseHuntTemplate.Keys.BHK]?.textValue,
+                    cover = coverByEntry[entry.id]?.firstOrNull(),
                 )
             }
         }
@@ -90,8 +101,9 @@ class EntryRepository @Inject constructor(
                 fieldDefDao.observe(entryId),
                 fieldValueDao.observe(entryId),
                 contactDao.observe(entryId),
-            ) { collection, ownDefs, values, contacts ->
-                buildDetail(entry, collection, ownDefs, values, contacts)
+                attachmentDao.observeMedia(entryId),
+            ) { collection, ownDefs, values, contacts, attachments ->
+                buildDetail(entry, collection, ownDefs, values, contacts, attachments)
             }
         }
 
@@ -110,7 +122,10 @@ class EntryRepository @Inject constructor(
         )
     }
 
-    suspend fun deleteEntry(entryId: Long) = entryDao.delete(entryId)
+    suspend fun deleteEntry(entryId: Long) {
+        entryDao.delete(entryId)
+        mediaFiles.deleteEntryFolder(entryId)
+    }
 
     /** Stores the flat's position. [accuracyM] is null for positions typed in by hand. */
     suspend fun setLocation(entryId: Long, lat: Double, lng: Double, accuracyM: Float?) =
@@ -219,13 +234,14 @@ class EntryRepository @Inject constructor(
         ownDefs: List<EntryFieldDefEntity>,
         values: List<FieldValueEntity>,
         contacts: List<ContactEntity>,
+        attachments: List<AttachmentEntity>,
     ): EntryDetail {
         val byKey = values.associateBy { it.fieldKey }
         val fields = resolve(collection, ownDefs).map { scoped ->
             val v = byKey[scoped.def.key]
             FieldEntry(scoped, v?.textValue, v?.numValue)
         }
-        return EntryDetail(entry, fields, contacts)
+        return EntryDetail(entry, fields, contacts, attachments)
     }
 
     private fun toFieldValue(entryId: Long, def: FieldDef, raw: String): FieldValueEntity? {

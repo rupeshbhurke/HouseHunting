@@ -24,4 +24,5 @@ object DatabaseModule {
     @Provides fun entryFieldDefDao(db: AppDatabase) = db.entryFieldDefDao()
     @Provides fun fieldValueDao(db: AppDatabase) = db.fieldValueDao()
     @Provides fun contactDao(db: AppDatabase) = db.contactDao()
+    @Provides fun attachmentDao(db: AppDatabase) = db.attachmentDao()
 }
