@@ -1,0 +1,119 @@
+package com.rupeshbhurke.househunter.core.data.db
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Embedded
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
+
+data class CollectionWithCount(
+    @Embedded val collection: CollectionEntity,
+    val entryCount: Int,
+)
+
+@Dao
+interface TemplateDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(template: TemplateEntity)
+
+    @Query("SELECT * FROM templates WHERE id = :id")
+    suspend fun get(id: String): TemplateEntity?
+}
+
+@Dao
+interface CollectionDao {
+    @Query(
+        "SELECT c.*, (SELECT COUNT(*) FROM entries e WHERE e.collectionId = c.id) AS entryCount " +
+            "FROM collections c ORDER BY c.createdAt DESC",
+    )
+    fun observeAllWithCount(): Flow<List<CollectionWithCount>>
+
+    @Query("SELECT * FROM collections WHERE id = :id")
+    fun observe(id: Long): Flow<CollectionEntity?>
+
+    @Query("SELECT * FROM collections WHERE id = :id")
+    suspend fun get(id: Long): CollectionEntity?
+
+    @Insert
+    suspend fun insert(collection: CollectionEntity): Long
+
+    @Query("UPDATE collections SET name = :name WHERE id = :id")
+    suspend fun rename(id: Long, name: String)
+
+    @Query("UPDATE collections SET extraFieldDefsJson = :json WHERE id = :id")
+    suspend fun setExtraFieldDefs(id: Long, json: String)
+
+    @Query("DELETE FROM collections WHERE id = :id")
+    suspend fun delete(id: Long)
+}
+
+@Dao
+interface EntryDao {
+    @Query("SELECT * FROM entries WHERE collectionId = :collectionId ORDER BY updatedAt DESC")
+    fun observeByCollection(collectionId: Long): Flow<List<EntryEntity>>
+
+    @Query("SELECT * FROM entries WHERE id = :id")
+    fun observe(id: Long): Flow<EntryEntity?>
+
+    @Query("SELECT * FROM entries WHERE id = :id")
+    suspend fun get(id: Long): EntryEntity?
+
+    @Query("SELECT COUNT(*) FROM entries WHERE collectionId = :collectionId")
+    suspend fun countInCollection(collectionId: Long): Int
+
+    @Insert
+    suspend fun insert(entry: EntryEntity): Long
+
+    @Update
+    suspend fun update(entry: EntryEntity)
+
+    @Query("DELETE FROM entries WHERE id = :id")
+    suspend fun delete(id: Long)
+}
+
+@Dao
+interface EntryFieldDefDao {
+    @Query("SELECT * FROM entry_field_defs WHERE entryId = :entryId ORDER BY id")
+    fun observe(entryId: Long): Flow<List<EntryFieldDefEntity>>
+
+    @Query("SELECT * FROM entry_field_defs WHERE entryId = :entryId ORDER BY id")
+    suspend fun get(entryId: Long): List<EntryFieldDefEntity>
+
+    @Insert
+    suspend fun insert(def: EntryFieldDefEntity)
+}
+
+@Dao
+interface FieldValueDao {
+    @Query("SELECT * FROM field_values WHERE entryId = :entryId")
+    fun observe(entryId: Long): Flow<List<FieldValueEntity>>
+
+    @Query(
+        "SELECT v.* FROM field_values v JOIN entries e ON e.id = v.entryId WHERE e.collectionId = :collectionId",
+    )
+    fun observeByCollection(collectionId: Long): Flow<List<FieldValueEntity>>
+
+    @Query("DELETE FROM field_values WHERE entryId = :entryId")
+    suspend fun deleteForEntry(entryId: Long)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAll(values: List<FieldValueEntity>)
+}
+
+@Dao
+interface ContactDao {
+    @Query("SELECT * FROM contacts WHERE entryId = :entryId ORDER BY id")
+    fun observe(entryId: Long): Flow<List<ContactEntity>>
+
+    @Insert
+    suspend fun insert(contact: ContactEntity)
+
+    @Update
+    suspend fun update(contact: ContactEntity)
+
+    @Delete
+    suspend fun delete(contact: ContactEntity)
+}

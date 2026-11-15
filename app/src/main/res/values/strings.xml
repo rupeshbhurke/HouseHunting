@@ -1,5 +1,86 @@
 <resources>
     <string name="app_name">House Hunter</string>
+
+    <!-- Shared -->
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_save">Save</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_add">Add</string>
+    <string name="action_create">Create</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_discard">Discard</string>
+    <string name="action_more">More options</string>
+    <string name="action_clear">Clear</string>
+
+    <!-- Collections -->
+    <string name="collections_empty_title">No hunts yet</string>
+    <string name="collections_empty_body">Create a collection to start cataloging the flats you visit.</string>
+    <string name="collections_new">New collection</string>
+    <string name="collections_create_title">New collection</string>
+    <string name="collections_rename_title">Rename collection</string>
+    <string name="collections_name_label">Name (e.g. Pune Hunt 2026)</string>
+    <string name="collections_delete_title">Delete collection?</string>
+    <string name="collections_delete_body">\"%1$s\" and all %2$d flats in it will be deleted. This can\'t be undone.</string>
+    <plurals name="collection_flat_count">
+        <item quantity="one">%d flat</item>
+        <item quantity="other">%d flats</item>
+    </plurals>
+
+    <!-- Entry list -->
+    <string name="entries_empty_title">No flats yet</string>
+    <string name="entries_empty_body">Tap \"Add flat\" when you start a visit.</string>
+    <string name="entries_add">Add flat</string>
+    <string name="entry_untitled_hint">Flat</string>
+
+    <!-- Entry detail -->
+    <string name="entry_detail_empty">No details yet. Tap Edit to add some.</string>
+    <string name="entry_delete_title">Delete this flat?</string>
+    <string name="entry_delete_body">\"%1$s\" and its details will be deleted. This can\'t be undone.</string>
+    <string name="entry_contacts">Contacts</string>
+    <string name="entry_call">Call</string>
+    <string name="entry_whatsapp">WhatsApp</string>
+
+    <!-- Entry edit -->
+    <string name="edit_title_label">Title</string>
+    <string name="edit_status_label">Status</string>
+    <string name="edit_rating_label">Rating</string>
+    <string name="edit_pick_date">Pick a date</string>
+    <string name="edit_add_field">Add field</string>
+    <string name="edit_add_contact">Add contact</string>
+    <string name="edit_discard_title">Discard changes?</string>
+    <string name="edit_discard_body">Your edits to this flat haven\'t been saved.</string>
+    <string name="edit_rate_stars">Rate %1$d of 5</string>
+
+    <!-- Add field dialog -->
+    <string name="add_field_title">Add field</string>
+    <string name="add_field_label">Field name</string>
+    <string name="add_field_type">Type</string>
+    <string name="add_field_options">Options (comma separated)</string>
+    <string name="add_field_to_all">Add to all flats in this collection</string>
+    <string name="add_field_to_all_hint">Otherwise it appears on this flat only.</string>
+
+    <!-- Contact dialog -->
+    <string name="contact_dialog_title">Contact</string>
+    <string name="contact_name_label">Name</string>
+    <string name="contact_phone_label">Phone</string>
+
+    <!-- Enums -->
+    <string name="field_type_text">Text</string>
+    <string name="field_type_long_text">Long text</string>
+    <string name="field_type_number">Number</string>
+    <string name="field_type_money">Amount</string>
+    <string name="field_type_phone">Phone</string>
+    <string name="field_type_enum">Choice</string>
+    <string name="field_type_rating">Rating</string>
+    <string name="field_type_date">Date</string>
+    <string name="status_new">New</string>
+    <string name="status_shortlisted">Shortlisted</string>
+    <string name="status_visit_again">Visit again</string>
+    <string name="status_rejected">Rejected</string>
+    <string name="contact_role_agent">Agent</string>
+    <string name="contact_role_owner">Owner</string>
     <string name="home_empty_title">No hunts yet</string>
     <string name="home_empty_body">Create a collection to start cataloging the flats you visit.</string>
 </resources>
