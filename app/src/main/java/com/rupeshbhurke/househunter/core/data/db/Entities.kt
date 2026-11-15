@@ -140,3 +140,12 @@ data class NoteEntity(
     val lng: Double? = null,
     val createdAt: Long,
 )
+
+/** A place the user cares about (office, school…); flats show their distance to each. */
+@Entity(tableName = "reference_points")
+data class ReferencePointEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val lat: Double,
+    val lng: Double,
+)

@@ -26,4 +26,5 @@ object DatabaseModule {
     @Provides fun contactDao(db: AppDatabase) = db.contactDao()
     @Provides fun attachmentDao(db: AppDatabase) = db.attachmentDao()
     @Provides fun noteDao(db: AppDatabase) = db.noteDao()
+    @Provides fun referencePointDao(db: AppDatabase) = db.referencePointDao()
 }

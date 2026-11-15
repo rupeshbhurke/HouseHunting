@@ -181,3 +181,15 @@ interface NoteDao {
     @Query("DELETE FROM notes WHERE id = :id")
     suspend fun delete(id: Long)
 }
+
+@Dao
+interface ReferencePointDao {
+    @Query("SELECT * FROM reference_points ORDER BY name COLLATE NOCASE")
+    fun observeAll(): Flow<List<ReferencePointEntity>>
+
+    @Insert
+    suspend fun insert(point: ReferencePointEntity): Long
+
+    @Query("DELETE FROM reference_points WHERE id = :id")
+    suspend fun delete(id: Long)
+}

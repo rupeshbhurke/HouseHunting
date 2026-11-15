@@ -102,6 +102,51 @@ class EntryFiltererTest {
         assertTrue(f.withField("price", null).fields.isEmpty())
     }
 
+    private fun located(id: Long, lat: Double?, lng: Double?, base: EntrySummary = rows.first { it.entry.id == id }) =
+        base.copy(entry = base.entry.copy(lat = lat, lng = lng))
+
+    // Office at the origin; flats 1, 2, 3 sit roughly 1.1 km, 11 km and 111 km north of it; flat 4 has no position.
+    private val near = listOf(
+        located(1, 0.01, 0.0),
+        located(2, 0.10, 0.0),
+        located(3, 1.00, 0.0),
+        rows.first { it.entry.id == 4L },
+    )
+    private fun nearIds(f: EntryFilter) = EntryFilterer.apply(near, f).map { it.entry.id }
+
+    @Test
+    fun near_withARadiusKeepsOnlyFlatsInsideItAndDropsThoseWithoutAPosition() {
+        val office = NearFilter(0.0, 0.0, radiusKm = 20.0, label = "Office")
+        assertEquals(listOf(1L, 2L), nearIds(EntryFilter(near = office)))
+        assertEquals(listOf(1L), nearIds(EntryFilter(near = office.copy(radiusKm = 5.0))))
+    }
+
+    @Test
+    fun near_withoutARadiusKeepsEveryFlatAndCanSortNearestFirst() {
+        val office = NearFilter(0.0, 0.0, radiusKm = null, label = "Office")
+        assertEquals(listOf(1L, 2L, 3L, 4L), nearIds(EntryFilter(near = office, sort = SortOption.DISTANCE)))
+        val reversed = near.reversed()
+        assertEquals(
+            listOf(1L, 2L, 3L, 4L),
+            EntryFilterer.apply(reversed, EntryFilter(near = office, sort = SortOption.DISTANCE)).map { it.entry.id },
+        )
+    }
+
+    @Test
+    fun near_countsAsAFilterAndCombinesWithOthers() {
+        val office = NearFilter(0.0, 0.0, radiusKm = 200.0, label = "Office")
+        val f = EntryFilter(near = office, statuses = setOf(EntryStatus.SHORTLISTED))
+        assertEquals(2, f.activeCount)
+        assertEquals(listOf(1L, 3L), nearIds(f))
+    }
+
+    @Test
+    fun cleared_dropsNearAndFallsBackFromDistanceSort() {
+        val f = EntryFilter(near = NearFilter(0.0, 0.0, 5.0, "x"), sort = SortOption.DISTANCE).cleared()
+        assertFalse(f.isActive)
+        assertEquals(SortOption.RECENT, f.sort)
+    }
+
     @Test
     fun cleared_keepsTheSortOrder() {
         val f = EntryFilter(text = "x", sort = SortOption.RATING).cleared()
