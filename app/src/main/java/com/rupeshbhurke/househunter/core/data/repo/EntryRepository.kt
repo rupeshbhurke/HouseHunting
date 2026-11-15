@@ -112,6 +112,13 @@ class EntryRepository @Inject constructor(
 
     suspend fun deleteEntry(entryId: Long) = entryDao.delete(entryId)
 
+    /** Stores the flat's position. [accuracyM] is null for positions typed in by hand. */
+    suspend fun setLocation(entryId: Long, lat: Double, lng: Double, accuracyM: Float?) =
+        entryDao.setLocation(entryId, lat, lng, accuracyM, System.currentTimeMillis())
+
+    suspend fun clearLocation(entryId: Long) =
+        entryDao.setLocation(entryId, null, null, null, System.currentTimeMillis())
+
     /**
      * Saves the flat's core columns and replaces its field values.
      * [values] holds raw user input keyed by field key; blank or unparsable input is dropped.

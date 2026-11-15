@@ -70,6 +70,9 @@ interface EntryDao {
     @Update
     suspend fun update(entry: EntryEntity)
 
+    @Query("UPDATE entries SET lat = :lat, lng = :lng, accuracyM = :accuracyM, updatedAt = :now WHERE id = :id")
+    suspend fun setLocation(id: Long, lat: Double?, lng: Double?, accuracyM: Float?, now: Long)
+
     @Query("DELETE FROM entries WHERE id = :id")
     suspend fun delete(id: Long)
 }

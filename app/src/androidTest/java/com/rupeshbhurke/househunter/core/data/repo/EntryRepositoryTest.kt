@@ -81,6 +81,33 @@ class EntryRepositoryTest {
     }
 
     @Test
+    fun location_isStoredWithAccuracyAndSurvivesSavingTheForm() = runBlocking {
+        val entryId = entries.createEntry(collections.create("Pune"))
+        entries.setLocation(entryId, 18.5204, 73.8567, 12.5f)
+
+        entries.saveEntry(entryId, "Renamed", EntryStatus.NEW, null, mapOf(Keys.PRICE to "1"))
+
+        val entry = entries.getDetail(entryId).entry
+        assertEquals(18.5204, entry.lat!!, 0.0)
+        assertEquals(73.8567, entry.lng!!, 0.0)
+        assertEquals(12.5f, entry.accuracyM!!, 0.0f)
+        assertEquals("Renamed", entry.title)
+    }
+
+    @Test
+    fun location_canBeClearedAndEnteredManuallyWithoutAccuracy() = runBlocking {
+        val entryId = entries.createEntry(collections.create("Pune"))
+        entries.setLocation(entryId, 18.5, 73.8, 5f)
+        entries.clearLocation(entryId)
+        assertNull(entries.getDetail(entryId).entry.lat)
+
+        entries.setLocation(entryId, 19.0, 72.8, null)
+        val entry = entries.getDetail(entryId).entry
+        assertEquals(19.0, entry.lat!!, 0.0)
+        assertNull(entry.accuracyM)
+    }
+
+    @Test
     fun saveEntry_withUnparsableNumber_leavesFieldEmpty() = runBlocking {
         val entryId = entries.createEntry(collections.create("Pune"))
         entries.saveEntry(entryId, "x", EntryStatus.NEW, null, mapOf(Keys.PRICE to "1.2.3"))
