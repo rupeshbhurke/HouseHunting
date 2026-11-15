@@ -11,7 +11,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 | M3 — Photo & video capture | ✅ done | `m3-capture` |
 | M4 — Notes: text, audio, video | ✅ done | `m4-notes` |
 | M5 — Import (gallery + share sheet) | ✅ done | `m5-import` |
-| M6 — Search, filter & compare | ⬜ | `m6-search-compare` |
+| M6 — Search, filter & compare | ✅ done | `m6-search-compare` |
 | M7 — Map view & "near a location" search | ⬜ | `m7-map-near-search` |
 | M8 — Export / share | ⬜ | `m8-export` |
 | M9 — Google Drive backup & restore | ⬜ | `m9-drive-backup` |
@@ -148,10 +148,15 @@ Fields in the House Hunt template:
 
 > Not exercised by hand: the system photo picker itself (a standard Android component). A share must carry read access to the file, as real shares from other apps do.
 
-### M6 — Search, filter & compare ⬜
-- [ ] FTS index over every field (base + extra + custom), notes, contacts, captions
-- [ ] Dynamic filter sheet for any field type
-- [ ] Compare 2–3 entries side by side with cover photos
+### M6 — Search, filter & compare ✅
+- [x] Free-text search over every field (base, shared and custom), title, status, contacts, notes and captions
+- [x] Filter sheet with a control for every field in the collection (ranges for numbers, amounts and dates; choices; contains-text; minimum stars), plus status, minimum rating and sort (recent, price, rating)
+- [x] Search and filters combine, are remembered per collection while the app is open, show a count badge and "Clear all"
+- [x] Select 2–3 flats (long-press) and compare side by side with cover photo, status, rating and every filled-in field
+- [x] Unit tests for filtering, sorting and the search text; instrumented tests for list rows and the collection's field list
+- [x] Emulator walkthrough: search, status filter, multi-select, compare
+
+> Decision in M6: search text is built in memory for each flat instead of a separate full-text table. It is always in sync with edits, needs no extra migration, and is fast enough for thousands of flats. A full-text table can be added later if lists ever get much larger.
 
 ### M7 — Map view & "near a location" search ⬜
 - [ ] Map pins colored by status, preview card on tap

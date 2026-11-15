@@ -34,6 +34,40 @@
     <string name="entries_add">Add flat</string>
     <string name="entry_untitled_hint">Flat</string>
 
+    <!-- Search, filter, compare -->
+    <string name="list_search">Search</string>
+    <string name="list_search_hint">Search flats, notes, contacts…</string>
+    <string name="list_filter">Filters</string>
+    <string name="list_compare">Compare</string>
+    <string name="list_cancel_selection">Cancel selection</string>
+    <plurals name="list_selected">
+        <item quantity="one">%d selected</item>
+        <item quantity="other">%d selected (max 3)</item>
+    </plurals>
+    <plurals name="list_filters_active">
+        <item quantity="one">%d filter on</item>
+        <item quantity="other">%d filters on</item>
+    </plurals>
+    <string name="list_clear_filters">Clear all</string>
+    <string name="list_no_match_title">No flats match</string>
+    <string name="list_no_match_body">Try fewer filters or a different search.</string>
+    <string name="filters_title">Filters</string>
+    <string name="filters_reset">Reset</string>
+    <string name="filters_done">Show flats</string>
+    <string name="filters_sort">Sort by</string>
+    <string name="filters_min_rating">Minimum rating</string>
+    <string name="filters_min">Min</string>
+    <string name="filters_max">Max</string>
+    <string name="filters_from">From</string>
+    <string name="filters_to">To</string>
+    <string name="filters_contains">Contains</string>
+    <string name="sort_recent">Recent</string>
+    <string name="sort_price_low">Price: low to high</string>
+    <string name="sort_price_high">Price: high to low</string>
+    <string name="sort_rating">Rating</string>
+    <string name="compare_title">Compare</string>
+    <string name="compare_no_value">—</string>
+
     <!-- Entry detail -->
     <string name="entry_detail_empty">No details yet. Tap Edit to add some.</string>
     <string name="entry_delete_title">Delete this flat?</string>

@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rupeshbhurke.househunter.feature.capture.CaptureScreen
 import com.rupeshbhurke.househunter.feature.collections.CollectionsScreen
+import com.rupeshbhurke.househunter.feature.compare.CompareScreen
 import com.rupeshbhurke.househunter.feature.entries.EntryListScreen
 import com.rupeshbhurke.househunter.feature.entry.EntryDetailScreen
 import com.rupeshbhurke.househunter.feature.entry.EntryEditScreen
@@ -28,6 +29,9 @@ data class EntryDetailRoute(val entryId: Long)
 
 @Serializable
 data class EntryEditRoute(val entryId: Long)
+
+@Serializable
+data class CompareRoute(val entryIds: List<Long>)
 
 @Serializable
 data class CaptureRoute(val entryId: Long, val videoNote: Boolean = false)
@@ -55,6 +59,7 @@ fun AppNavHost(openEntryId: Long? = null) {
                 onOpenEntry = { navController.navigate(EntryDetailRoute(it)) },
                 // A new flat opens straight in the edit form; saving returns to the list.
                 onEntryCreated = { navController.navigate(EntryEditRoute(it)) },
+                onCompare = { navController.navigate(CompareRoute(it)) },
             )
         }
         composable<EntryDetailRoute> {
@@ -65,6 +70,9 @@ fun AppNavHost(openEntryId: Long? = null) {
                 onVideoNote = { navController.navigate(CaptureRoute(it, videoNote = true)) },
                 onOpenMedia = { entryId, index -> navController.navigate(MediaViewerRoute(entryId, index)) },
             )
+        }
+        composable<CompareRoute> {
+            CompareScreen(onBack = navController::popBackStack)
         }
         composable<CaptureRoute> {
             CaptureScreen(onClose = navController::popBackStack)
