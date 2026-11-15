@@ -92,6 +92,23 @@
         <item quantity="other">%d saved</item>
     </plurals>
 
+    <!-- Notes -->
+    <string name="notes_title">Notes</string>
+    <string name="notes_add_text">Text</string>
+    <string name="notes_add_audio">Audio</string>
+    <string name="notes_add_video">Video</string>
+    <string name="notes_empty">No notes yet. Jot something down, or record a voice or video note.</string>
+    <string name="notes_text_title">Note</string>
+    <string name="notes_text_label">What did you notice?</string>
+    <string name="notes_audio_title">Recording audio note</string>
+    <string name="notes_audio_stop">Stop and save</string>
+    <string name="notes_audio_failed">Couldn\'t start the microphone. Is another app using it?</string>
+    <string name="notes_audio_label">Audio note · %1$s</string>
+    <string name="notes_play">Play</string>
+    <string name="notes_pause">Pause</string>
+    <string name="notes_delete_title">Delete this note?</string>
+    <string name="notes_delete_body">It will be removed from this phone. This can\'t be undone.</string>
+
     <!-- Add field dialog -->
     <string name="add_field_title">Add field</string>
     <string name="add_field_label">Field name</string>

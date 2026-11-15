@@ -6,7 +6,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.rupeshbhurke.househunter.core.data.model.AttachmentKind
 import com.rupeshbhurke.househunter.core.data.model.MediaSource
+import com.rupeshbhurke.househunter.core.data.model.NoteKind
 import com.rupeshbhurke.househunter.core.data.repo.MediaRepository
+import com.rupeshbhurke.househunter.core.data.repo.NoteRepository
 import com.rupeshbhurke.househunter.core.location.Fix
 import com.rupeshbhurke.househunter.core.location.LocationClient
 import com.rupeshbhurke.househunter.core.media.MediaFiles
@@ -24,6 +26,7 @@ import javax.inject.Inject
 class CaptureViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val media: MediaRepository,
+    private val notes: NoteRepository,
     private val mediaFiles: MediaFiles,
     private val location: LocationClient,
 ) : ViewModel() {
@@ -56,7 +59,9 @@ class CaptureViewModel @Inject constructor(
         val where = fix
         // Not tied to the screen's lifetime: a recording finalised as the screen closes must still be kept.
         viewModelScope.launch(NonCancellable) {
-            media.addFile(
+            if (videoNote && kind == AttachmentKind.VIDEO) {
+                notes.addRecording(entryId, file, NoteKind.VIDEO, durationMs ?: 0, where)
+            } else media.addFile(
                 entryId = entryId,
                 file = file,
                 kind = kind,

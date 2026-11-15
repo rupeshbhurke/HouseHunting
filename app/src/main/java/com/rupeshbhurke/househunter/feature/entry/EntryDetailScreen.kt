@@ -47,6 +47,7 @@ import com.rupeshbhurke.househunter.core.data.db.EntryEntity
 import com.rupeshbhurke.househunter.core.data.model.FieldResolver
 import com.rupeshbhurke.househunter.core.data.repo.EntryDetail
 import com.rupeshbhurke.househunter.core.data.repo.FieldEntry
+import com.rupeshbhurke.househunter.core.data.repo.NoteItem
 import com.rupeshbhurke.househunter.core.util.ContactActions
 import com.rupeshbhurke.househunter.core.util.FieldFormat
 import com.rupeshbhurke.househunter.core.util.MapActions
@@ -61,10 +62,22 @@ fun EntryDetailScreen(
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
     onCapture: (Long) -> Unit,
+    onVideoNote: (Long) -> Unit,
     onOpenMedia: (entryId: Long, index: Int) -> Unit,
     viewModel: EntryDetailViewModel = hiltViewModel(),
 ) {
     val detail by viewModel.detail.collectAsStateWithLifecycle()
+    val notes by viewModel.notes.collectAsStateWithLifecycle()
+    val notesActions = remember(viewModel) {
+        NotesActions(
+            newAudioFile = viewModel::newAudioFile,
+            onAddText = viewModel::addTextNote,
+            onSaveAudio = viewModel::addAudioNote,
+            onVideoNote = { onVideoNote(viewModel.entryId) },
+            onEditText = viewModel::updateTextNote,
+            onDelete = viewModel::deleteNote,
+        )
+    }
     var confirmDelete by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -90,6 +103,8 @@ fun EntryDetailScreen(
         detail?.let {
             EntryDetailContent(
                 detail = it,
+                notes = notes,
+                notesActions = notesActions,
                 onCapture = { onCapture(viewModel.entryId) },
                 onOpenMedia = { index -> onOpenMedia(viewModel.entryId, index) },
                 modifier = Modifier.padding(padding),
@@ -117,6 +132,8 @@ fun EntryDetailScreen(
 @Composable
 private fun EntryDetailContent(
     detail: EntryDetail,
+    notes: List<NoteItem>,
+    notesActions: NotesActions,
     onCapture: () -> Unit,
     onOpenMedia: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -139,7 +156,8 @@ private fun EntryDetailContent(
             item { LocationCard(detail.entry) }
         }
         item { MediaCard(detail.attachments, onCapture, onOpenMedia) }
-        if (groups.isEmpty() && detail.contacts.isEmpty() && detail.entry.lat == null && detail.attachments.isEmpty()) {
+        item { NotesCard(notes, notesActions) }
+        if (groups.isEmpty() && detail.contacts.isEmpty() && detail.entry.lat == null && detail.attachments.isEmpty() && notes.isEmpty()) {
             item {
                 Text(
                     stringResource(R.string.entry_detail_empty),

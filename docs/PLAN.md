@@ -9,7 +9,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 | M1 — Collections & entries (template-driven) | ✅ done | `m1-collections-entries` |
 | M2 — GPS for the flat | ✅ done | `m2-gps` |
 | M3 — Photo & video capture | ✅ done | `m3-capture` |
-| M4 — Notes: text, audio, video | ⬜ | `m4-notes` |
+| M4 — Notes: text, audio, video | ✅ done | `m4-notes` |
 | M5 — Import (gallery + share sheet) | ⬜ | `m5-import` |
 | M6 — Search, filter & compare | ⬜ | `m6-search-compare` |
 | M7 — Map view & "near a location" search | ⬜ | `m7-map-near-search` |
@@ -129,12 +129,14 @@ Fields in the House Hunt template:
 
 > Decision in M3: the gallery is a horizontal strip on the flat plus a swipeable full-screen viewer, rather than a separate grid screen. Photos taken without location permission carry no position.
 
-### M4 — Notes: text, audio, video ⬜
-- [ ] Notes timeline in the entry
-- [ ] Text note editor
-- [ ] Audio recorder + playback
-- [ ] Video note (CameraX video mode)
-- [ ] Every note geotagged + timestamped
+### M4 — Notes: text, audio, video ✅
+- [x] Notes timeline on the flat (newest first)
+- [x] Text note editor (add, edit, delete)
+- [x] Audio recorder with playback
+- [x] Video note through the camera screen (single clip, returns to the flat)
+- [x] Every note geotagged (last known position) and timestamped
+- [x] Recordings are removed with their note, flat or collection; note files stay out of the media strip
+- [x] Database v3 with an automatic migration; repository tests; emulator walkthrough of all three note types
 
 ### M5 — Import (gallery + share sheet) ⬜
 - [ ] Photo Picker import inside an entry

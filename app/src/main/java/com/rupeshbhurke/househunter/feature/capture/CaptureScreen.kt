@@ -104,6 +104,8 @@ fun CaptureScreen(
     val previewView = remember { PreviewView(context).apply { scaleType = PreviewView.ScaleType.FILL_CENTER } }
 
     LaunchedEffect(hasCamera) { if (hasCamera) provider = context.cameraProvider() }
+    // A video note is a single clip: close as soon as it is saved.
+    LaunchedEffect(saved) { if (viewModel.videoNote && saved > 0) onClose() }
 
     // Only the use cases for the current mode are bound; that works on every camera hardware level.
     LaunchedEffect(provider, videoMode, useFront) {

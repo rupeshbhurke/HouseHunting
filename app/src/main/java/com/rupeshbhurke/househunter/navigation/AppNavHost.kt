@@ -50,6 +50,7 @@ fun AppNavHost() {
                 onBack = navController::popBackStack,
                 onEdit = { navController.navigate(EntryEditRoute(it)) },
                 onCapture = { navController.navigate(CaptureRoute(it)) },
+                onVideoNote = { navController.navigate(CaptureRoute(it, videoNote = true)) },
                 onOpenMedia = { entryId, index -> navController.navigate(MediaViewerRoute(entryId, index)) },
             )
         }
