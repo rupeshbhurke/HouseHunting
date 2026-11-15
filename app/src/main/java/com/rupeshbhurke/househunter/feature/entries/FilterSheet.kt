@@ -77,12 +77,27 @@ fun FilterSheet(
 
             Section(R.string.filters_sort) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SortOption.entries.forEach { option ->
+                    SortOption.entries.filter { it != SortOption.DISTANCE || filter.near != null }.forEach { option ->
                         FilterChip(
                             selected = filter.sort == option,
                             onClick = { onChange(filter.copy(sort = option)) },
                             label = { Text(stringResource(option.labelRes())) },
                         )
+                    }
+                }
+            }
+            filter.near?.let { near ->
+                Section(R.string.filters_near) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            near.radiusKm?.let { stringResource(R.string.filters_near_within, near.label, it) }
+                                ?: near.label,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.weight(1f),
+                        )
+                        TextButton(onClick = {
+                            onChange(filter.copy(near = null, sort = if (filter.sort == SortOption.DISTANCE) SortOption.RECENT else filter.sort))
+                        }) { Text(stringResource(R.string.action_clear)) }
                     }
                 }
             }
@@ -124,6 +139,7 @@ private fun SortOption.labelRes() = when (this) {
     SortOption.PRICE_LOW -> R.string.sort_price_low
     SortOption.PRICE_HIGH -> R.string.sort_price_high
     SortOption.RATING -> R.string.sort_rating
+    SortOption.DISTANCE -> R.string.sort_distance
 }
 
 @Composable

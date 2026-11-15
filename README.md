@@ -12,11 +12,15 @@ Kotlin · Jetpack Compose (Material 3) · Hilt · Room · Navigation Compose · 
 ## Setup
 1. Install Android Studio (with JDK 17+) and the Android SDK (platform 36).
 2. Clone the repo and open it in Android Studio. It creates `local.properties` with your `sdk.dir`.
-3. *(Needed from M7 on)* Create `secrets.properties` in the project root:
+3. *(Needed for the map and place search)* Create `secrets.properties` in the project root:
    ```properties
    MAPS_API_KEY=your-google-cloud-api-key
    ```
    This file is git-ignored. Never commit real keys; `secrets.defaults.properties` holds placeholders.
+   In Google Cloud, create an API key, enable **Maps SDK for Android** and **Places API (New)**, and
+   restrict the key to this app (package `com.rupeshbhurke.househunter` plus your signing certificate's
+   SHA-1) and to those two APIs. Without a key everything else works; the map shows a notice and place
+   search is unavailable.
 
 ## Build & test
 ```bash

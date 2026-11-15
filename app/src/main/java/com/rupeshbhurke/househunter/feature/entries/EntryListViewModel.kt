@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.rupeshbhurke.househunter.core.data.db.ReferencePointEntity
 import com.rupeshbhurke.househunter.core.data.model.EntryFilter
 import com.rupeshbhurke.househunter.core.data.model.EntryFilterer
 import com.rupeshbhurke.househunter.core.data.model.FieldDef
@@ -11,6 +12,7 @@ import com.rupeshbhurke.househunter.core.data.repo.CollectionRepository
 import com.rupeshbhurke.househunter.core.data.repo.EntryRepository
 import com.rupeshbhurke.househunter.core.data.repo.EntrySummary
 import com.rupeshbhurke.househunter.core.data.repo.FilterStore
+import com.rupeshbhurke.househunter.core.data.repo.ReferencePointRepository
 import com.rupeshbhurke.househunter.navigation.EntryListRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,8 +32,9 @@ class EntryListViewModel @Inject constructor(
     collections: CollectionRepository,
     private val entries: EntryRepository,
     private val filters: FilterStore,
+    references: ReferencePointRepository,
 ) : ViewModel() {
-    private val collectionId = savedStateHandle.toRoute<EntryListRoute>().collectionId
+    val collectionId = savedStateHandle.toRoute<EntryListRoute>().collectionId
 
     val collectionName: StateFlow<String> = collections.observeCollection(collectionId)
         .map { it?.name.orEmpty() }
@@ -42,6 +45,9 @@ class EntryListViewModel @Inject constructor(
 
     /** Every field in the collection, for the filter sheet. */
     val fields: StateFlow<List<FieldDef>> = entries.observeFields(collectionId)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val referencePoints: StateFlow<List<ReferencePointEntity>> = references.observeAll()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     /** Null until the first database emission, so the empty state doesn't flash. */

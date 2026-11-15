@@ -53,12 +53,15 @@ import com.rupeshbhurke.househunter.R
 import com.rupeshbhurke.househunter.core.data.db.AttachmentEntity
 import com.rupeshbhurke.househunter.core.data.db.ContactEntity
 import com.rupeshbhurke.househunter.core.data.db.EntryEntity
+import com.rupeshbhurke.househunter.core.data.db.ReferencePointEntity
 import com.rupeshbhurke.househunter.core.data.model.FieldResolver
 import com.rupeshbhurke.househunter.core.data.repo.EntryDetail
 import com.rupeshbhurke.househunter.core.data.repo.FieldEntry
 import com.rupeshbhurke.househunter.core.data.repo.NoteItem
+import com.rupeshbhurke.househunter.core.data.repo.ReferencePointRepository
 import com.rupeshbhurke.househunter.core.util.ContactActions
 import com.rupeshbhurke.househunter.core.util.FieldFormat
+import com.rupeshbhurke.househunter.core.util.Geo
 import com.rupeshbhurke.househunter.core.util.MapActions
 import com.rupeshbhurke.househunter.ui.components.MediaStrip
 import com.rupeshbhurke.househunter.ui.components.RatingStars
@@ -77,6 +80,7 @@ fun EntryDetailScreen(
 ) {
     val detail by viewModel.detail.collectAsStateWithLifecycle()
     val notes by viewModel.notes.collectAsStateWithLifecycle()
+    val points by viewModel.referencePoints.collectAsStateWithLifecycle()
     val importing by viewModel.importing.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -132,6 +136,7 @@ fun EntryDetailScreen(
             EntryDetailContent(
                 detail = it,
                 notes = notes,
+                referencePoints = points,
                 importing = importing,
                 onImport = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
                 notesActions = notesActions,
@@ -163,6 +168,7 @@ fun EntryDetailScreen(
 private fun EntryDetailContent(
     detail: EntryDetail,
     notes: List<NoteItem>,
+    referencePoints: List<ReferencePointEntity>,
     importing: Boolean,
     onImport: () -> Unit,
     notesActions: NotesActions,
@@ -185,7 +191,7 @@ private fun EntryDetailContent(
             }
         }
         if (detail.entry.lat != null && detail.entry.lng != null) {
-            item { LocationCard(detail.entry) }
+            item { LocationCard(detail.entry, referencePoints) }
         }
         item { MediaCard(detail.attachments, importing, onCapture, onImport, onOpenMedia) }
         item { NotesCard(notes, notesActions) }
@@ -261,7 +267,7 @@ private fun ContactsCard(contacts: List<ContactEntity>) {
 }
 
 @Composable
-private fun LocationCard(entry: EntryEntity) {
+private fun LocationCard(entry: EntryEntity, referencePoints: List<ReferencePointEntity>) {
     val context = LocalContext.current
     val lat = entry.lat ?: return
     val lng = entry.lng ?: return
@@ -277,6 +283,13 @@ private fun LocationCard(entry: EntryEntity) {
                     color = MaterialTheme.colorScheme.primary,
                 )
                 Text(locationSummary(entry), style = MaterialTheme.typography.bodyLarge)
+                ReferencePointRepository.distances(entry, referencePoints).forEach { (point, km) ->
+                    Text(
+                        stringResource(R.string.location_distance_to, Geo.format(km), point.name),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             TextButton(onClick = { MapActions.open(context, lat, lng, entry.title) }) {
                 Text(stringResource(R.string.location_open_maps))

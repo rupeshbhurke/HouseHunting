@@ -15,6 +15,7 @@ import com.rupeshbhurke.househunter.feature.compare.CompareScreen
 import com.rupeshbhurke.househunter.feature.entries.EntryListScreen
 import com.rupeshbhurke.househunter.feature.entry.EntryDetailScreen
 import com.rupeshbhurke.househunter.feature.entry.EntryEditScreen
+import com.rupeshbhurke.househunter.feature.map.MapScreen
 import com.rupeshbhurke.househunter.feature.media.MediaViewerScreen
 import kotlinx.serialization.Serializable
 
@@ -29,6 +30,9 @@ data class EntryDetailRoute(val entryId: Long)
 
 @Serializable
 data class EntryEditRoute(val entryId: Long)
+
+@Serializable
+data class MapRoute(val collectionId: Long)
 
 @Serializable
 data class CompareRoute(val entryIds: List<Long>)
@@ -60,6 +64,7 @@ fun AppNavHost(openEntryId: Long? = null) {
                 // A new flat opens straight in the edit form; saving returns to the list.
                 onEntryCreated = { navController.navigate(EntryEditRoute(it)) },
                 onCompare = { navController.navigate(CompareRoute(it)) },
+                onOpenMap = { navController.navigate(MapRoute(it)) },
             )
         }
         composable<EntryDetailRoute> {
@@ -69,6 +74,12 @@ fun AppNavHost(openEntryId: Long? = null) {
                 onCapture = { navController.navigate(CaptureRoute(it)) },
                 onVideoNote = { navController.navigate(CaptureRoute(it, videoNote = true)) },
                 onOpenMedia = { entryId, index -> navController.navigate(MediaViewerRoute(entryId, index)) },
+            )
+        }
+        composable<MapRoute> {
+            MapScreen(
+                onBack = navController::popBackStack,
+                onOpenEntry = { navController.navigate(EntryDetailRoute(it)) },
             )
         }
         composable<CompareRoute> {

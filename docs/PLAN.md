@@ -12,7 +12,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 | M4 — Notes: text, audio, video | ✅ done | `m4-notes` |
 | M5 — Import (gallery + share sheet) | ✅ done | `m5-import` |
 | M6 — Search, filter & compare | ✅ done | `m6-search-compare` |
-| M7 — Map view & "near a location" search | ⬜ | `m7-map-near-search` |
+| M7 — Map view & "near a location" search | ⏸ built; needs your API key to verify the map | `m7-map-near-search` |
 | M8 — Export / share | ⬜ | `m8-export` |
 | M9 — Google Drive backup & restore | ⬜ | `m9-drive-backup` |
 
@@ -158,12 +158,16 @@ Fields in the House Hunt template:
 
 > Decision in M6: search text is built in memory for each flat instead of a separate full-text table. It is always in sync with edits, needs no extra migration, and is fast enough for thousands of flats. A full-text table can be added later if lists ever get much larger.
 
-### M7 — Map view & "near a location" search ⬜
-- [ ] Map pins colored by status, preview card on tap
-- [ ] Center point: long-press/drag pin, Places search, current location
-- [ ] Radius slider (0.5–20 km) with circle; list sorted by distance; combines with filters
-- [ ] Saved reference points + distance on cards/detail, sort by distance to a point
-- [ ] *You:* Google Cloud API key with Maps SDK for Android + Places API (New)
+### M7 — Map view & "near a location" search ⏸
+- [x] Map screen with a pin per flat, coloured by status, and a preview card that opens the flat
+- [x] Near search centre from: long-press on the map, place search (Places autocomplete), or your current location
+- [x] Radius slider (0.5–20 km) with a circle on the map, an optional "Limit" switch, nearest-first sort; combines with search and filters and is shared with the list
+- [x] Saved reference points (Office, School…): save the centre by name, pick or remove them; each flat's card and detail screen show the straight-line distance
+- [x] Unit tests for distances and the near filter; instrumented tests for reference points; database v4 with automatic migration
+- [x] Emulator walkthrough without a key: no crash, notice shown, near search from my location, saving a point, distance on the card
+- [ ] **Needs your Google Maps API key to verify:** map tiles, pins and the circle, long-press to drop a pin, and place search
+
+> To enable: put `MAPS_API_KEY=...` in `secrets.properties` (see README). Enable **Maps SDK for Android** and **Places API (New)**, and restrict the key to this app's package and signing SHA-1.
 
 ### M8 — Export / share ⬜
 - [ ] PDF summary (fields, contacts, thumbnails, notes, map link)

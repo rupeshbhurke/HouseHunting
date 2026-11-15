@@ -4,11 +4,13 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.rupeshbhurke.househunter.core.data.db.ReferencePointEntity
 import com.rupeshbhurke.househunter.core.data.model.NoteKind
 import com.rupeshbhurke.househunter.core.data.repo.EntryDetail
 import com.rupeshbhurke.househunter.core.data.repo.EntryRepository
 import com.rupeshbhurke.househunter.core.data.repo.NoteItem
 import com.rupeshbhurke.househunter.core.data.repo.NoteRepository
+import com.rupeshbhurke.househunter.core.data.repo.ReferencePointRepository
 import com.rupeshbhurke.househunter.core.location.LocationClient
 import com.rupeshbhurke.househunter.core.media.ImportResult
 import com.rupeshbhurke.househunter.core.media.MediaFiles
@@ -35,11 +37,15 @@ class EntryDetailViewModel @Inject constructor(
     private val mediaFiles: MediaFiles,
     private val location: LocationClient,
     private val importer: MediaImporter,
+    references: ReferencePointRepository,
 ) : ViewModel() {
     val entryId = savedStateHandle.toRoute<EntryDetailRoute>().entryId
 
     val detail: StateFlow<EntryDetail?> = repository.observeDetail(entryId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    val referencePoints: StateFlow<List<ReferencePointEntity>> = references.observeAll()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val notes: StateFlow<List<NoteItem>> = noteRepository.observeNotes(entryId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())

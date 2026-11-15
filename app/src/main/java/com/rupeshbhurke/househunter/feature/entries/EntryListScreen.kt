@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CompareArrows
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Apartment
 import androidx.compose.material3.Badge
@@ -58,8 +59,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rupeshbhurke.househunter.R
+import com.rupeshbhurke.househunter.core.data.db.ReferencePointEntity
 import com.rupeshbhurke.househunter.core.data.repo.EntrySummary
+import com.rupeshbhurke.househunter.core.data.repo.ReferencePointRepository
 import com.rupeshbhurke.househunter.core.util.FieldFormat
+import com.rupeshbhurke.househunter.core.util.Geo
 import com.rupeshbhurke.househunter.ui.components.MediaThumbnail
 import com.rupeshbhurke.househunter.ui.components.RatingStars
 import com.rupeshbhurke.househunter.ui.components.StatusChip
@@ -73,12 +77,14 @@ fun EntryListScreen(
     onOpenEntry: (Long) -> Unit,
     onEntryCreated: (Long) -> Unit,
     onCompare: (List<Long>) -> Unit,
+    onOpenMap: (Long) -> Unit,
     viewModel: EntryListViewModel = hiltViewModel(),
 ) {
     val name by viewModel.collectionName.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
     val fields by viewModel.fields.collectAsStateWithLifecycle()
+    val points by viewModel.referencePoints.collectAsStateWithLifecycle()
 
     var searching by remember { mutableStateOf(filter.text.isNotEmpty()) }
     var showFilters by remember { mutableStateOf(false) }
@@ -121,6 +127,9 @@ fun EntryListScreen(
                             Icon(Icons.Filled.CompareArrows, contentDescription = stringResource(R.string.list_compare))
                         }
                     } else {
+                        IconButton(onClick = { onOpenMap(viewModel.collectionId) }) {
+                            Icon(Icons.Filled.Map, contentDescription = stringResource(R.string.list_map))
+                        }
                         if (!searching) {
                             IconButton(onClick = { searching = true }) {
                                 Icon(Icons.Filled.Search, contentDescription = stringResource(R.string.list_search))
@@ -180,6 +189,7 @@ fun EntryListScreen(
                         val id = summary.entry.id
                         EntryCard(
                             summary = summary,
+                            distances = ReferencePointRepository.distances(summary.entry, points),
                             selecting = selecting,
                             selected = id in selected,
                             onClick = {
@@ -230,6 +240,7 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
 @Composable
 private fun EntryCard(
     summary: EntrySummary,
+    distances: List<Pair<ReferencePointEntity, Double>>,
     selecting: Boolean,
     selected: Boolean,
     onClick: () -> Unit,
@@ -268,6 +279,15 @@ private fun EntryCard(
                 Text(entry.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 if (subtitle.isNotEmpty()) {
                     Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                if (distances.isNotEmpty()) {
+                    Text(
+                        distances.take(2).joinToString("  •  ") { (point, km) -> "${point.name} ${Geo.format(km)}" },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     StatusChip(entry.status)

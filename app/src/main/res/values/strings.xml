@@ -68,6 +68,31 @@
     <string name="compare_title">Compare</string>
     <string name="compare_no_value">—</string>
 
+    <!-- Map and near search -->
+    <string name="list_map">Map</string>
+    <string name="sort_distance">Nearest first</string>
+    <string name="filters_near">Near</string>
+    <string name="filters_near_within">%1$s, within %2$.1f km</string>
+    <string name="location_distance_to">%1$s from %2$s</string>
+    <string name="map_my_location">My location</string>
+    <string name="map_dropped_pin">Dropped pin</string>
+    <string name="map_search_place">Search place</string>
+    <string name="map_save_point">Save place</string>
+    <string name="map_save_point_title">Save this place</string>
+    <string name="map_save_point_label">Name (e.g. Office, School)</string>
+    <string name="map_delete_point">Remove %1$s</string>
+    <string name="map_near_hint">Long-press the map to drop a pin, search a place, or use your location to see flats near it.</string>
+    <string name="map_near_label">Near %1$s</string>
+    <string name="map_limit_radius">Limit</string>
+    <string name="map_radius_km">%1$.1f km</string>
+    <plurals name="map_matching">
+        <item quantity="one">%d flat shown</item>
+        <item quantity="other">%d flats shown</item>
+    </plurals>
+    <string name="map_open_flat">Open</string>
+    <string name="map_key_missing">The map needs a Google Maps API key. Add MAPS_API_KEY to secrets.properties (see the README).</string>
+    <string name="map_key_needed_for_search">Place search needs a Google Maps API key. Add MAPS_API_KEY to secrets.properties (see the README).</string>
+
     <!-- Entry detail -->
     <string name="entry_detail_empty">No details yet. Tap Edit to add some.</string>
     <string name="entry_delete_title">Delete this flat?</string>
