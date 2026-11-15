@@ -10,7 +10,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 | M2 — GPS for the flat | ✅ done | `m2-gps` |
 | M3 — Photo & video capture | ✅ done | `m3-capture` |
 | M4 — Notes: text, audio, video | ✅ done | `m4-notes` |
-| M5 — Import (gallery + share sheet) | ⬜ | `m5-import` |
+| M5 — Import (gallery + share sheet) | ✅ done | `m5-import` |
 | M6 — Search, filter & compare | ⬜ | `m6-search-compare` |
 | M7 — Map view & "near a location" search | ⬜ | `m7-map-near-search` |
 | M8 — Export / share | ⬜ | `m8-export` |
@@ -138,11 +138,15 @@ Fields in the House Hunt template:
 - [x] Recordings are removed with their note, flat or collection; note files stay out of the media strip
 - [x] Database v3 with an automatic migration; repository tests; emulator walkthrough of all three note types
 
-### M5 — Import (gallery + share sheet) ⬜
-- [ ] Photo Picker import inside an entry
-- [ ] Share target for `image/*`, `video/*` (single + multiple)
-- [ ] Choose collection/entry or create a new one from the share flow
-- [ ] Copy into app storage; read EXIF GPS/date
+### M5 — Import (gallery + share sheet) ✅
+- [x] Import button on the flat using the system photo picker (multiple photos and videos)
+- [x] Share target for images and videos, single or multiple (WhatsApp → Share → House Hunter)
+- [x] Share flow: choose a collection (or create one), then a flat or a new flat; "Open flat" afterwards
+- [x] Files are copied into app storage; place and time are read from EXIF (photos) and container tags (videos)
+- [x] Unit tests for date and place parsing; instrumented tests with a real EXIF-tagged JPEG
+- [x] Emulator check of the share flow with a content:// URI
+
+> Not exercised by hand: the system photo picker itself (a standard Android component). A share must carry read access to the file, as real shares from other apps do.
 
 ### M6 — Search, filter & compare ⬜
 - [ ] FTS index over every field (base + extra + custom), notes, contacts, captions

@@ -92,6 +92,36 @@
         <item quantity="other">%d saved</item>
     </plurals>
 
+    <!-- Import and share -->
+    <string name="media_import">Import</string>
+    <plurals name="import_done">
+        <item quantity="one">Imported %d file.</item>
+        <item quantity="other">Imported %d files.</item>
+    </plurals>
+    <plurals name="import_failed">
+        <item quantity="one">%d couldn\'t be imported.</item>
+        <item quantity="other">%d couldn\'t be imported.</item>
+    </plurals>
+    <string name="share_title">Add to House Hunter</string>
+    <plurals name="share_file_count">
+        <item quantity="one">%d file</item>
+        <item quantity="other">%d files</item>
+    </plurals>
+    <string name="share_choose_collection">Which collection?</string>
+    <string name="share_choose_flat">Which flat in %1$s?</string>
+    <string name="share_new_flat">New flat</string>
+    <string name="share_importing">Copying files…</string>
+    <plurals name="share_done">
+        <item quantity="one">Added %1$d file to %2$s.</item>
+        <item quantity="other">Added %1$d files to %2$s.</item>
+    </plurals>
+    <plurals name="share_failed">
+        <item quantity="one">%d file couldn\'t be added.</item>
+        <item quantity="other">%d files couldn\'t be added.</item>
+    </plurals>
+    <string name="share_open_flat">Open flat</string>
+    <string name="share_close">Done</string>
+
     <!-- Notes -->
     <string name="notes_title">Notes</string>
     <string name="notes_add_text">Text</string>

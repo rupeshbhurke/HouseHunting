@@ -1,6 +1,11 @@
 package com.rupeshbhurke.househunter.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -31,8 +36,15 @@ data class CaptureRoute(val entryId: Long, val videoNote: Boolean = false)
 data class MediaViewerRoute(val entryId: Long, val startIndex: Int)
 
 @Composable
-fun AppNavHost() {
+fun AppNavHost(openEntryId: Long? = null) {
     val navController = rememberNavController()
+    var opened by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(openEntryId) {
+        if (openEntryId != null && !opened) {
+            opened = true
+            navController.navigate(EntryDetailRoute(openEntryId))
+        }
+    }
     NavHost(navController = navController, startDestination = CollectionsRoute) {
         composable<CollectionsRoute> {
             CollectionsScreen(onOpenCollection = { navController.navigate(EntryListRoute(it)) })

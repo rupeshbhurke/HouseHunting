@@ -1,5 +1,8 @@
 package com.rupeshbhurke.househunter.feature.entry
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,10 +19,15 @@ import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +77,24 @@ fun EntryDetailScreen(
 ) {
     val detail by viewModel.detail.collectAsStateWithLifecycle()
     val notes by viewModel.notes.collectAsStateWithLifecycle()
+    val importing by viewModel.importing.collectAsStateWithLifecycle()
+    val snackbar = remember { SnackbarHostState() }
+    val context = LocalContext.current
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia()) { uris ->
+        viewModel.importMedia(uris)
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.importResult.collect { result ->
+            val message = buildString {
+                append(context.resources.getQuantityString(R.plurals.import_done, result.imported, result.imported))
+                if (result.failed > 0) {
+                    append(" ")
+                    append(context.resources.getQuantityString(R.plurals.import_failed, result.failed, result.failed))
+                }
+            }
+            snackbar.showSnackbar(message)
+        }
+    }
     val notesActions = remember(viewModel) {
         NotesActions(
             newAudioFile = viewModel::newAudioFile,
@@ -81,6 +108,7 @@ fun EntryDetailScreen(
     var confirmDelete by remember { mutableStateOf(false) }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
                 title = { Text(detail?.entry?.title.orEmpty(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
@@ -104,6 +132,8 @@ fun EntryDetailScreen(
             EntryDetailContent(
                 detail = it,
                 notes = notes,
+                importing = importing,
+                onImport = { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo)) },
                 notesActions = notesActions,
                 onCapture = { onCapture(viewModel.entryId) },
                 onOpenMedia = { index -> onOpenMedia(viewModel.entryId, index) },
@@ -133,6 +163,8 @@ fun EntryDetailScreen(
 private fun EntryDetailContent(
     detail: EntryDetail,
     notes: List<NoteItem>,
+    importing: Boolean,
+    onImport: () -> Unit,
     notesActions: NotesActions,
     onCapture: () -> Unit,
     onOpenMedia: (Int) -> Unit,
@@ -155,7 +187,7 @@ private fun EntryDetailContent(
         if (detail.entry.lat != null && detail.entry.lng != null) {
             item { LocationCard(detail.entry) }
         }
-        item { MediaCard(detail.attachments, onCapture, onOpenMedia) }
+        item { MediaCard(detail.attachments, importing, onCapture, onImport, onOpenMedia) }
         item { NotesCard(notes, notesActions) }
         if (groups.isEmpty() && detail.contacts.isEmpty() && detail.entry.lat == null && detail.attachments.isEmpty() && notes.isEmpty()) {
             item {
@@ -254,7 +286,13 @@ private fun LocationCard(entry: EntryEntity) {
 }
 
 @Composable
-private fun MediaCard(media: List<AttachmentEntity>, onCapture: () -> Unit, onOpen: (Int) -> Unit) {
+private fun MediaCard(
+    media: List<AttachmentEntity>,
+    importing: Boolean,
+    onCapture: () -> Unit,
+    onImport: () -> Unit,
+    onOpen: (Int) -> Unit,
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
@@ -264,9 +302,16 @@ private fun MediaCard(media: List<AttachmentEntity>, onCapture: () -> Unit, onOp
                 color = MaterialTheme.colorScheme.primary,
             )
             if (media.isNotEmpty()) MediaStrip(media, onOpen)
-            FilledTonalButton(onClick = onCapture) {
-                Icon(Icons.Filled.PhotoCamera, contentDescription = null)
-                Text(stringResource(R.string.media_capture), modifier = Modifier.padding(start = 8.dp))
+            if (importing) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(onClick = onCapture) {
+                    Icon(Icons.Filled.PhotoCamera, contentDescription = null)
+                    Text(stringResource(R.string.media_capture), modifier = Modifier.padding(start = 8.dp))
+                }
+                OutlinedButton(onClick = onImport, enabled = !importing) {
+                    Icon(Icons.Filled.PhotoLibrary, contentDescription = null)
+                    Text(stringResource(R.string.media_import), modifier = Modifier.padding(start = 8.dp))
+                }
             }
         }
     }
