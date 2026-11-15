@@ -55,3 +55,5 @@ enum class ContactRole(@StringRes val labelRes: Int) {
 enum class AttachmentKind { PHOTO, VIDEO, AUDIO }
 
 enum class MediaSource { CAPTURED, IMPORTED }
+
+enum class NoteKind { TEXT, AUDIO, VIDEO }

@@ -9,6 +9,7 @@ import com.rupeshbhurke.househunter.core.data.model.ContactRole
 import com.rupeshbhurke.househunter.core.data.model.EntryStatus
 import com.rupeshbhurke.househunter.core.data.model.FieldType
 import com.rupeshbhurke.househunter.core.data.model.MediaSource
+import com.rupeshbhurke.househunter.core.data.model.NoteKind
 
 @Entity(tableName = "templates")
 data class TemplateEntity(
@@ -119,4 +120,23 @@ data class AttachmentEntity(
     val caption: String? = null,
     val durationMs: Long? = null,
     val isNote: Boolean = false,
+)
+
+/** A text, audio or video note about a flat. Audio and video notes point at their recording. */
+@Entity(
+    tableName = "notes",
+    foreignKeys = [
+        ForeignKey(EntryEntity::class, ["id"], ["entryId"], onDelete = ForeignKey.CASCADE),
+    ],
+    indices = [Index("entryId")],
+)
+data class NoteEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val entryId: Long,
+    val kind: NoteKind,
+    val text: String? = null,
+    val attachmentId: Long? = null,
+    val lat: Double? = null,
+    val lng: Double? = null,
+    val createdAt: Long,
 )

@@ -137,6 +137,9 @@ interface AttachmentDao {
     )
     fun observeVisualMediaByCollection(collectionId: Long): Flow<List<AttachmentEntity>>
 
+    @Query("SELECT * FROM attachments WHERE entryId = :entryId AND isNote = 1")
+    fun observeNoteFiles(entryId: Long): Flow<List<AttachmentEntity>>
+
     @Query("SELECT * FROM attachments WHERE id = :id")
     suspend fun get(id: Long): AttachmentEntity?
 
@@ -147,5 +150,20 @@ interface AttachmentDao {
     suspend fun setCaption(id: Long, caption: String?)
 
     @Query("DELETE FROM attachments WHERE id = :id")
+    suspend fun delete(id: Long)
+}
+
+@Dao
+interface NoteDao {
+    @Query("SELECT * FROM notes WHERE entryId = :entryId ORDER BY createdAt DESC, id DESC")
+    fun observe(entryId: Long): Flow<List<NoteEntity>>
+
+    @Insert
+    suspend fun insert(note: NoteEntity): Long
+
+    @Query("UPDATE notes SET text = :text WHERE id = :id")
+    suspend fun updateText(id: Long, text: String)
+
+    @Query("DELETE FROM notes WHERE id = :id")
     suspend fun delete(id: Long)
 }
