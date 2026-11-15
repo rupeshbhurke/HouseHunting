@@ -15,6 +15,7 @@ object HouseHuntTemplate {
         const val BHK = "bhk"
         const val FLOOR = "floor"
         const val AREA_SQFT = "area_sqft"
+        const val AREA_TYPE = "area_type"
         const val FACING = "facing"
         const val PRICE = "price"
         const val DEPOSIT = "deposit"
@@ -34,6 +35,10 @@ object HouseHuntTemplate {
         ),
         FieldDef(Keys.FLOOR, "Floor", FieldType.TEXT, GROUP_BASICS),
         FieldDef(Keys.AREA_SQFT, "Area (sq ft)", FieldType.NUMBER, GROUP_BASICS),
+        FieldDef(
+            Keys.AREA_TYPE, "Area type", FieldType.ENUM, GROUP_BASICS,
+            options = listOf("Carpet", "RERA Carpet", "Built-up", "Super built-up"),
+        ),
         FieldDef(
             Keys.FACING, "Facing", FieldType.ENUM, GROUP_BASICS,
             options = listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW"),

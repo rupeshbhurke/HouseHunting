@@ -72,6 +72,15 @@ class FieldResolverTest {
     }
 
     @Test
+    fun houseHuntTemplate_areaTypeOffersTheFourAreaBases() {
+        val areaType = HuntField(HouseHuntTemplate.Keys.AREA_TYPE)
+        assertEquals(listOf("Carpet", "RERA Carpet", "Built-up", "Super built-up"), areaType.options)
+        assertEquals(FieldType.ENUM, areaType.type)
+    }
+
+    private fun HuntField(key: String) = HouseHuntTemplate.fields.first { it.key == key }
+
+    @Test
     fun houseHuntTemplate_hasUniqueKeysAndUsableChoices() {
         val keys = HouseHuntTemplate.fields.map { it.key }
         assertEquals(keys.distinct(), keys)

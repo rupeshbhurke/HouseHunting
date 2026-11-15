@@ -21,7 +21,7 @@ class CollectionRepository @Inject constructor(
     fun observeCollection(id: Long): Flow<CollectionEntity?> = collectionDao.observe(id)
 
     suspend fun create(name: String): Long {
-        seedTemplate()
+        syncBuiltInTemplates()
         return collectionDao.insert(
             CollectionEntity(
                 name = name.trim(),
@@ -35,8 +35,11 @@ class CollectionRepository @Inject constructor(
 
     suspend fun delete(id: Long) = collectionDao.delete(id)
 
-    /** Keeps the stored built-in template in sync with the one shipped in code. */
-    private suspend fun seedTemplate() {
+    /**
+     * Keeps the stored built-in template in sync with the one shipped in code. Called at app start
+     * so fields added in an update also reach collections that already exist.
+     */
+    suspend fun syncBuiltInTemplates() {
         templateDao.upsert(
             TemplateEntity(
                 id = HouseHuntTemplate.ID,

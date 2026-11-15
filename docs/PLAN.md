@@ -105,7 +105,7 @@ Fields in the House Hunt template:
 - [x] Instrumented tests (10) run green on an emulator
 - [x] Manual walkthrough on an emulator: create collection, add flat, set status/rating/price, add custom field to all flats, add contact, call button opens the dialer
 
-> Decisions made in M1: `address` is a template field (stored as a field value) rather than an `Entry` column, so M2's reverse-geocoded address will be written into that field. Amounts display with ₹ and Indian digit grouping. WhatsApp links assume +91 for 10-digit numbers.
+> Decisions made in M1: Basics has "Area (sq ft)" (number) plus "Area type" (Carpet, RERA Carpet, Built-up, Super built-up). `address` is a template field (stored as a field value) rather than an `Entry` column, so M2's reverse-geocoded address will be written into that field. Amounts display with ₹ and Indian digit grouping. WhatsApp links assume +91 for 10-digit numbers.
 
 ### M2 — GPS for the flat ⬜
 - [ ] Location permission flow

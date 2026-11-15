@@ -9,6 +9,7 @@ import com.rupeshbhurke.househunter.core.data.model.ContactRole
 import com.rupeshbhurke.househunter.core.data.model.EntryStatus
 import com.rupeshbhurke.househunter.core.data.model.FieldScope
 import com.rupeshbhurke.househunter.core.data.model.FieldType
+import com.rupeshbhurke.househunter.core.data.model.HouseHuntTemplate
 import com.rupeshbhurke.househunter.core.data.model.HouseHuntTemplate.Keys
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -47,6 +48,20 @@ class EntryRepositoryTest {
         assertTrue(detail.fields.isNotEmpty())
         assertTrue(detail.fields.all { it.isBlank })
         assertEquals(EntryStatus.NEW, detail.entry.status)
+    }
+
+    @Test
+    fun syncBuiltInTemplates_refreshesAStaleStoredTemplate() = runBlocking {
+        val collectionId = collections.create("Pune")
+        // Simulate a template stored by an older app version that lacked the area type field.
+        val stale = db.templateDao().get(HouseHuntTemplate.ID)!!
+        db.templateDao().upsert(stale.copy(fieldDefsJson = "[]"))
+        val entryId = entries.createEntry(collectionId)
+        assertTrue(entries.getDetail(entryId).fields.none { it.def.key == Keys.AREA_TYPE })
+
+        collections.syncBuiltInTemplates()
+
+        assertTrue(entries.getDetail(entryId).fields.any { it.def.key == Keys.AREA_TYPE })
     }
 
     @Test
