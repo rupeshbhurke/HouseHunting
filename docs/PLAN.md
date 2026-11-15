@@ -6,8 +6,8 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 | Milestone | Status | Branch |
 |---|---|---|
 | M0 — Project scaffold | ✅ done | `main` |
-| M1 — Collections & entries (template-driven) | ⏸ awaiting approval | `m1-collections-entries` |
-| M2 — GPS for the flat | ⬜ | `m2-gps` |
+| M1 — Collections & entries (template-driven) | ✅ done | `m1-collections-entries` |
+| M2 — GPS for the flat | ⏸ awaiting approval | `m2-gps` |
 | M3 — Photo & video capture | ⬜ | `m3-capture` |
 | M4 — Notes: text, audio, video | ⬜ | `m4-notes` |
 | M5 — Import (gallery + share sheet) | ⬜ | `m5-import` |
@@ -93,7 +93,7 @@ Fields in the House Hunt template:
 
 > Note: Room's `@Database` class arrives with the first entities in M1 (Room needs at least one entity to compile).
 
-### M1 — Collections & entries (template-driven) ⏸
+### M1 — Collections & entries (template-driven) ✅
 - [x] Room entities/DAOs for the generic core + database class
 - [x] Seed House Hunt template (upserted from code when a collection is created)
 - [x] Collections list: create, rename, delete
@@ -107,12 +107,16 @@ Fields in the House Hunt template:
 
 > Decisions made in M1: Basics has "Area (sq ft)" (number) plus "Area type" (Carpet, RERA Carpet, Built-up, Super built-up). `address` is a template field (stored as a field value) rather than an `Entry` column, so M2's reverse-geocoded address will be written into that field. Amounts display with ₹ and Indian digit grouping. WhatsApp links assume +91 for 10-digit numbers.
 
-### M2 — GPS for the flat ⬜
-- [ ] Location permission flow
-- [ ] Fused location fix with accuracy
-- [ ] Reverse-geocoded address
-- [ ] Manual pin adjust/override
-- [ ] "Open in Maps" link
+### M2 — GPS for the flat ⏸
+- [x] Location permission flow (asks on first use, explains a refusal)
+- [x] Fused location fix with accuracy (±metres shown; falls back to last known position)
+- [x] Reverse-geocoded address (fills the Address field only when it is blank)
+- [x] Manual override: type or paste coordinates ("18.5204, 73.8567" as copied from Google Maps)
+- [x] "Open in Maps" link (edit and detail screens)
+- [x] Unit tests for coordinate parsing; instrumented tests for storing, clearing and keeping the location
+- [x] Walkthrough on an emulator with a mock position: permission denied then allowed, fix, address, save, Open in Maps
+
+> Decision in M2: dragging a pin on a map to adjust the position needs the Google Maps API key, so it moves to M7 with the rest of the map work. Until then the position can be corrected by entering coordinates or re-capturing.
 
 ### M3 — Photo & video capture ⬜
 - [ ] CameraX screen launched from an entry (photo + video)

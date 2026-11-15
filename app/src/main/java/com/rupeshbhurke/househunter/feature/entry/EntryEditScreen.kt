@@ -1,6 +1,10 @@
 package com.rupeshbhurke.househunter.feature.entry
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,6 +29,8 @@ import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,23 +54,31 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rupeshbhurke.househunter.R
 import com.rupeshbhurke.househunter.core.data.db.ContactEntity
+import com.rupeshbhurke.househunter.core.data.db.EntryEntity
 import com.rupeshbhurke.househunter.core.data.model.ContactRole
 import com.rupeshbhurke.househunter.core.data.model.EntryStatus
 import com.rupeshbhurke.househunter.core.data.model.FieldResolver
 import com.rupeshbhurke.househunter.core.data.model.FieldType
 import com.rupeshbhurke.househunter.core.data.repo.FieldEntry
+import com.rupeshbhurke.househunter.core.util.Coordinates
 import com.rupeshbhurke.househunter.core.util.FieldFormat
+import com.rupeshbhurke.househunter.core.util.LatLng
+import com.rupeshbhurke.househunter.core.util.MapActions
 import com.rupeshbhurke.househunter.ui.components.RatingStars
+import com.rupeshbhurke.househunter.ui.components.locationSummary
 
 private sealed interface EditDialog {
     data object AddField : EditDialog
+    data object EnterCoordinates : EditDialog
     data class Contact(val existing: ContactEntity?) : EditDialog
     data object Discard : EditDialog
 }
@@ -76,6 +91,18 @@ fun EntryEditScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var dialog by remember { mutableStateOf<EditDialog?>(null) }
+    val locationStatus by viewModel.locationStatus.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val locationPermissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { grants ->
+        if (grants.values.any { it }) viewModel.captureLocation() else viewModel.permissionDenied()
+    }
+    val onCapture = {
+        val granted = locationPermissions.any {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+        }
+        if (granted) viewModel.captureLocation() else permissionLauncher.launch(locationPermissions)
+    }
     val dirty = state?.dirty == true
     val requestBack = { if (dirty) dialog = EditDialog.Discard else onDone() }
 
@@ -136,6 +163,15 @@ fun EntryEditScreen(
                     RatingStars(ui.draft.rating, size = 32.dp, onRate = viewModel::setRating)
                 }
             }
+            item {
+                LocationSection(
+                    entry = ui.detail.entry,
+                    status = locationStatus,
+                    onCapture = onCapture,
+                    onEnterCoordinates = { dialog = EditDialog.EnterCoordinates },
+                    onClear = viewModel::clearLocation,
+                )
+            }
             items(groups, key = { it.first }) { (group, fields) ->
                 FieldGroupSection(
                     group = group,
@@ -179,6 +215,10 @@ fun EntryEditScreen(
                 viewModel.addField(label, type, options, addToAll)
                 dialog = null
             },
+            onDismiss = { dialog = null },
+        )
+        EditDialog.EnterCoordinates -> CoordinatesDialog(
+            onConfirm = { viewModel.setManualLocation(it); dialog = null },
             onDismiss = { dialog = null },
         )
         is EditDialog.Contact -> ContactDialog(
@@ -452,6 +492,103 @@ private fun ContactDialog(
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(role, name, phone) }, enabled = phone.isNotBlank()) {
+                Text(stringResource(R.string.action_save))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun LocationSection(
+    entry: EntryEntity,
+    status: LocationStatus,
+    onCapture: () -> Unit,
+    onEnterCoordinates: () -> Unit,
+    onClear: () -> Unit,
+) {
+    val context = LocalContext.current
+    val lat = entry.lat
+    val lng = entry.lng
+    val fetching = status == LocationStatus.Fetching
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                stringResource(R.string.location_title),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            if (lat != null && lng != null) {
+                Text(locationSummary(entry), style = MaterialTheme.typography.bodyLarge)
+            } else {
+                Text(
+                    stringResource(R.string.location_not_set),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (status is LocationStatus.Failed) {
+                Text(
+                    stringResource(status.messageRes),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FilledTonalButton(onClick = onCapture, enabled = !fetching) {
+                    if (fetching) {
+                        CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                    }
+                    Text(
+                        stringResource(
+                            when {
+                                fetching -> R.string.location_fetching
+                                lat != null -> R.string.location_update
+                                else -> R.string.location_capture
+                            },
+                        ),
+                        modifier = Modifier.padding(start = if (fetching) 8.dp else 0.dp),
+                    )
+                }
+                OutlinedButton(onClick = onEnterCoordinates) { Text(stringResource(R.string.location_enter)) }
+                if (lat != null && lng != null) {
+                    TextButton(onClick = { MapActions.open(context, lat, lng, entry.title) }) {
+                        Text(stringResource(R.string.location_open_maps))
+                    }
+                    TextButton(onClick = onClear) { Text(stringResource(R.string.action_clear)) }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CoordinatesDialog(onConfirm: (LatLng) -> Unit, onDismiss: () -> Unit) {
+    var text by rememberSaveable { mutableStateOf("") }
+    val parsed = Coordinates.parse(text)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.location_enter_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text(stringResource(R.string.location_enter_label)) },
+                    placeholder = { Text("18.5204, 73.8567") },
+                    singleLine = true,
+                    isError = text.isNotBlank() && parsed == null,
+                )
+                Text(
+                    stringResource(R.string.location_enter_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { parsed?.let(onConfirm) }, enabled = parsed != null) {
                 Text(stringResource(R.string.action_save))
             }
         },

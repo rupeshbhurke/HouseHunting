@@ -40,12 +40,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rupeshbhurke.househunter.R
 import com.rupeshbhurke.househunter.core.data.db.ContactEntity
+import com.rupeshbhurke.househunter.core.data.db.EntryEntity
 import com.rupeshbhurke.househunter.core.data.model.FieldResolver
 import com.rupeshbhurke.househunter.core.data.repo.EntryDetail
 import com.rupeshbhurke.househunter.core.data.repo.FieldEntry
 import com.rupeshbhurke.househunter.core.util.ContactActions
 import com.rupeshbhurke.househunter.core.util.FieldFormat
+import com.rupeshbhurke.househunter.core.util.MapActions
 import com.rupeshbhurke.househunter.ui.components.RatingStars
+import com.rupeshbhurke.househunter.ui.components.locationSummary
 import com.rupeshbhurke.househunter.ui.components.StatusChip
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,7 +117,10 @@ private fun EntryDetailContent(detail: EntryDetail, modifier: Modifier = Modifie
                 RatingStars(detail.entry.rating)
             }
         }
-        if (groups.isEmpty() && detail.contacts.isEmpty()) {
+        if (detail.entry.lat != null && detail.entry.lng != null) {
+            item { LocationCard(detail.entry) }
+        }
+        if (groups.isEmpty() && detail.contacts.isEmpty() && detail.entry.lat == null) {
             item {
                 Text(
                     stringResource(R.string.entry_detail_empty),
@@ -180,6 +186,31 @@ private fun ContactsCard(contacts: List<ContactEntity>) {
                         Icon(Icons.AutoMirrored.Filled.Chat, contentDescription = stringResource(R.string.entry_whatsapp))
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocationCard(entry: EntryEntity) {
+    val context = LocalContext.current
+    val lat = entry.lat ?: return
+    val lng = entry.lng ?: return
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.location_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(locationSummary(entry), style = MaterialTheme.typography.bodyLarge)
+            }
+            TextButton(onClick = { MapActions.open(context, lat, lng, entry.title) }) {
+                Text(stringResource(R.string.location_open_maps))
             }
         }
     }

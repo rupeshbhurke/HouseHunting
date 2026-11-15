@@ -1,16 +1,22 @@
 package com.rupeshbhurke.househunter.feature.entry
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.rupeshbhurke.househunter.R
 import com.rupeshbhurke.househunter.core.data.db.ContactEntity
 import com.rupeshbhurke.househunter.core.data.model.ContactRole
 import com.rupeshbhurke.househunter.core.data.model.EntryStatus
 import com.rupeshbhurke.househunter.core.data.model.FieldType
+import com.rupeshbhurke.househunter.core.data.model.HouseHuntTemplate
 import com.rupeshbhurke.househunter.core.data.repo.EntryDetail
 import com.rupeshbhurke.househunter.core.data.repo.EntryRepository
+import com.rupeshbhurke.househunter.core.location.AddressResolver
+import com.rupeshbhurke.househunter.core.location.LocationClient
 import com.rupeshbhurke.househunter.core.util.FieldFormat
+import com.rupeshbhurke.househunter.core.util.LatLng
 import com.rupeshbhurke.househunter.navigation.EntryEditRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,10 +42,18 @@ data class EditUiState(
     val dirty: Boolean,
 )
 
+sealed interface LocationStatus {
+    data object Idle : LocationStatus
+    data object Fetching : LocationStatus
+    data class Failed(@StringRes val messageRes: Int) : LocationStatus
+}
+
 @HiltViewModel
 class EntryEditViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: EntryRepository,
+    private val locationClient: LocationClient,
+    private val addressResolver: AddressResolver,
 ) : ViewModel() {
     private val entryId = savedStateHandle.toRoute<EntryEditRoute>().entryId
 
@@ -53,6 +67,9 @@ class EntryEditViewModel @Inject constructor(
     ) { detail, start, current ->
         if (start == null || current == null) null else EditUiState(detail, current, dirty = current != start)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    private val _locationStatus = MutableStateFlow<LocationStatus>(LocationStatus.Idle)
+    val locationStatus: StateFlow<LocationStatus> = _locationStatus
 
     init {
         viewModelScope.launch {
@@ -77,6 +94,47 @@ class EntryEditViewModel @Inject constructor(
         viewModelScope.launch {
             repository.saveEntry(entryId, current.title, current.status, current.rating, current.values)
             onSaved()
+        }
+    }
+
+    /** Takes a fix from the device (the caller has already secured the location permission). */
+    fun captureLocation() {
+        if (_locationStatus.value == LocationStatus.Fetching) return
+        _locationStatus.value = LocationStatus.Fetching
+        viewModelScope.launch {
+            val fix = locationClient.currentFix()
+            if (fix == null) {
+                _locationStatus.value = LocationStatus.Failed(R.string.location_error_no_fix)
+                return@launch
+            }
+            repository.setLocation(entryId, fix.lat, fix.lng, fix.accuracyM)
+            _locationStatus.value = LocationStatus.Idle
+            fillAddressIfBlank(fix.lat, fix.lng)
+        }
+    }
+
+    fun setManualLocation(point: LatLng) {
+        viewModelScope.launch {
+            repository.setLocation(entryId, point.lat, point.lng, accuracyM = null)
+            _locationStatus.value = LocationStatus.Idle
+            fillAddressIfBlank(point.lat, point.lng)
+        }
+    }
+
+    fun clearLocation() {
+        viewModelScope.launch { repository.clearLocation(entryId) }
+    }
+
+    fun permissionDenied() {
+        _locationStatus.value = LocationStatus.Failed(R.string.location_error_permission)
+    }
+
+    /** The street address goes into the draft, not the database, so saving the form keeps it. */
+    private suspend fun fillAddressIfBlank(lat: Double, lng: Double) {
+        val address = addressResolver.resolve(lat, lng) ?: return
+        draft.update { current ->
+            if (current == null || !current.values[HouseHuntTemplate.Keys.ADDRESS].isNullOrBlank()) current
+            else current.copy(values = current.values + (HouseHuntTemplate.Keys.ADDRESS to address))
         }
     }
 

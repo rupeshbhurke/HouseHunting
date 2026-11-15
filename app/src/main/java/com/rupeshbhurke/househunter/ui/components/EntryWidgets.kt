@@ -17,7 +17,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.rupeshbhurke.househunter.R
+import com.rupeshbhurke.househunter.core.data.db.EntryEntity
 import com.rupeshbhurke.househunter.core.data.model.EntryStatus
+import com.rupeshbhurke.househunter.core.util.Coordinates
 
 @Composable
 fun StatusChip(status: EntryStatus, modifier: Modifier = Modifier) {
@@ -44,4 +46,13 @@ fun RatingStars(
             )
         }
     }
+}
+
+/** "18.52040, 73.85670 · ±12 m", or "… · entered manually" for a hand-typed position. */
+@Composable
+fun locationSummary(entry: EntryEntity): String {
+    val lat = entry.lat ?: return ""
+    val lng = entry.lng ?: return ""
+    val tail = entry.accuracyM?.let(Coordinates::accuracy) ?: stringResource(R.string.location_manual)
+    return "${Coordinates.format(lat, lng)} · $tail"
 }

@@ -53,6 +53,21 @@
     <string name="edit_discard_body">Your edits to this flat haven\'t been saved.</string>
     <string name="edit_rate_stars">Rate %1$d of 5</string>
 
+    <!-- Location -->
+    <string name="location_title">Location</string>
+    <string name="location_not_set">No location yet. Capture it while you\'re at the flat.</string>
+    <string name="location_capture">Capture location</string>
+    <string name="location_update">Update location</string>
+    <string name="location_fetching">Getting location…</string>
+    <string name="location_enter">Enter coordinates</string>
+    <string name="location_open_maps">Open in Maps</string>
+    <string name="location_manual">entered manually</string>
+    <string name="location_enter_title">Enter coordinates</string>
+    <string name="location_enter_label">Latitude, longitude</string>
+    <string name="location_enter_hint">In Google Maps, long-press a spot and copy the numbers shown.</string>
+    <string name="location_error_no_fix">Couldn\'t get a location. Check that location is turned on and try again outside.</string>
+    <string name="location_error_permission">Location permission is needed. You can allow it in the app\'s settings.</string>
+
     <!-- Add field dialog -->
     <string name="add_field_title">Add field</string>
     <string name="add_field_label">Field name</string>
