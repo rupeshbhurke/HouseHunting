@@ -7,7 +7,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 |---|---|---|
 | M0 — Project scaffold | ✅ done | `main` |
 | M1 — Collections & entries (template-driven) | ✅ done | `m1-collections-entries` |
-| M2 — GPS for the flat | ⏸ awaiting approval | `m2-gps` |
+| M2 — GPS for the flat | ✅ done | `m2-gps` |
 | M3 — Photo & video capture | ⬜ | `m3-capture` |
 | M4 — Notes: text, audio, video | ⬜ | `m4-notes` |
 | M5 — Import (gallery + share sheet) | ⬜ | `m5-import` |
@@ -107,7 +107,7 @@ Fields in the House Hunt template:
 
 > Decisions made in M1: Basics has "Area (sq ft)" (number) plus "Area type" (Carpet, RERA Carpet, Built-up, Super built-up). `address` is a template field (stored as a field value) rather than an `Entry` column, so M2's reverse-geocoded address will be written into that field. Amounts display with ₹ and Indian digit grouping. WhatsApp links assume +91 for 10-digit numbers.
 
-### M2 — GPS for the flat ⏸
+### M2 — GPS for the flat ✅
 - [x] Location permission flow (asks on first use, explains a refusal)
 - [x] Fused location fix with accuracy (±metres shown; falls back to last known position)
 - [x] Reverse-geocoded address (fills the Address field only when it is blank)
