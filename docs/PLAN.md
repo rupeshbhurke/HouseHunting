@@ -8,7 +8,7 @@ Legend: ⬜ not started · 🟡 in progress · ✅ done (approved) · ⏸ awaiti
 | M0 — Project scaffold | ✅ done | `main` |
 | M1 — Collections & entries (template-driven) | ✅ done | `m1-collections-entries` |
 | M2 — GPS for the flat | ✅ done | `m2-gps` |
-| M3 — Photo & video capture | ⬜ | `m3-capture` |
+| M3 — Photo & video capture | ✅ done | `m3-capture` |
 | M4 — Notes: text, audio, video | ⬜ | `m4-notes` |
 | M5 — Import (gallery + share sheet) | ⬜ | `m5-import` |
 | M6 — Search, filter & compare | ⬜ | `m6-search-compare` |
@@ -118,10 +118,16 @@ Fields in the House Hunt template:
 
 > Decision in M2: dragging a pin on a map to adjust the position needs the Google Maps API key, so it moves to M7 with the rest of the map work. Until then the position can be corrected by entering coordinates or re-capturing.
 
-### M3 — Photo & video capture ⬜
-- [ ] CameraX screen launched from an entry (photo + video)
-- [ ] Per-capture lat/lng + timestamp, saved to `files/media/{entryId}/`
-- [ ] Entry media gallery: grid, full-screen viewer, video playback, caption, delete
+### M3 — Photo & video capture ✅
+- [x] CameraX screen launched from an entry (photo and video, front/back camera, recording timer)
+- [x] Per-capture lat/lng + timestamp, saved to `files/media/{entryId}/`
+- [x] Entry media strip with thumbnails, full-screen pager viewer, video playback, caption, delete
+- [x] List cards show the first photo or video as cover
+- [x] Files are deleted with their item, flat or collection
+- [x] Database v2 with an automatic migration, covered by a migration test
+- [x] Emulator walkthrough: permission prompts, two photos, a 4 s video, viewer for both
+
+> Decision in M3: the gallery is a horizontal strip on the flat plus a swipeable full-screen viewer, rather than a separate grid screen. Photos taken without location permission carry no position.
 
 ### M4 — Notes: text, audio, video ⬜
 - [ ] Notes timeline in the entry

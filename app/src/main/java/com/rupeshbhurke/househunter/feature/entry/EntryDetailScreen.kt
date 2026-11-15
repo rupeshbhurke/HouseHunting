@@ -15,9 +15,11 @@ import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rupeshbhurke.househunter.R
+import com.rupeshbhurke.househunter.core.data.db.AttachmentEntity
 import com.rupeshbhurke.househunter.core.data.db.ContactEntity
 import com.rupeshbhurke.househunter.core.data.db.EntryEntity
 import com.rupeshbhurke.househunter.core.data.model.FieldResolver
@@ -47,6 +50,7 @@ import com.rupeshbhurke.househunter.core.data.repo.FieldEntry
 import com.rupeshbhurke.househunter.core.util.ContactActions
 import com.rupeshbhurke.househunter.core.util.FieldFormat
 import com.rupeshbhurke.househunter.core.util.MapActions
+import com.rupeshbhurke.househunter.ui.components.MediaStrip
 import com.rupeshbhurke.househunter.ui.components.RatingStars
 import com.rupeshbhurke.househunter.ui.components.locationSummary
 import com.rupeshbhurke.househunter.ui.components.StatusChip
@@ -56,6 +60,8 @@ import com.rupeshbhurke.househunter.ui.components.StatusChip
 fun EntryDetailScreen(
     onBack: () -> Unit,
     onEdit: (Long) -> Unit,
+    onCapture: (Long) -> Unit,
+    onOpenMedia: (entryId: Long, index: Int) -> Unit,
     viewModel: EntryDetailViewModel = hiltViewModel(),
 ) {
     val detail by viewModel.detail.collectAsStateWithLifecycle()
@@ -81,7 +87,14 @@ fun EntryDetailScreen(
             )
         },
     ) { padding ->
-        detail?.let { EntryDetailContent(it, Modifier.padding(padding)) }
+        detail?.let {
+            EntryDetailContent(
+                detail = it,
+                onCapture = { onCapture(viewModel.entryId) },
+                onOpenMedia = { index -> onOpenMedia(viewModel.entryId, index) },
+                modifier = Modifier.padding(padding),
+            )
+        }
     }
 
     if (confirmDelete) {
@@ -102,7 +115,12 @@ fun EntryDetailScreen(
 }
 
 @Composable
-private fun EntryDetailContent(detail: EntryDetail, modifier: Modifier = Modifier) {
+private fun EntryDetailContent(
+    detail: EntryDetail,
+    onCapture: () -> Unit,
+    onOpenMedia: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val filled = detail.fields.filterNot { it.isBlank }
     val groups = FieldResolver.groupInOrder(filled) { it.def.group }
 
@@ -120,7 +138,8 @@ private fun EntryDetailContent(detail: EntryDetail, modifier: Modifier = Modifie
         if (detail.entry.lat != null && detail.entry.lng != null) {
             item { LocationCard(detail.entry) }
         }
-        if (groups.isEmpty() && detail.contacts.isEmpty() && detail.entry.lat == null) {
+        item { MediaCard(detail.attachments, onCapture, onOpenMedia) }
+        if (groups.isEmpty() && detail.contacts.isEmpty() && detail.entry.lat == null && detail.attachments.isEmpty()) {
             item {
                 Text(
                     stringResource(R.string.entry_detail_empty),
@@ -211,6 +230,25 @@ private fun LocationCard(entry: EntryEntity) {
             }
             TextButton(onClick = { MapActions.open(context, lat, lng, entry.title) }) {
                 Text(stringResource(R.string.location_open_maps))
+            }
+        }
+    }
+}
+
+@Composable
+private fun MediaCard(media: List<AttachmentEntity>, onCapture: () -> Unit, onOpen: (Int) -> Unit) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                if (media.isEmpty()) stringResource(R.string.media_title)
+                else stringResource(R.string.media_title_count, media.size),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            if (media.isNotEmpty()) MediaStrip(media, onOpen)
+            FilledTonalButton(onClick = onCapture) {
+                Icon(Icons.Filled.PhotoCamera, contentDescription = null)
+                Text(stringResource(R.string.media_capture), modifier = Modifier.padding(start = 8.dp))
             }
         }
     }

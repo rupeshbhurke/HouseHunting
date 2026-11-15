@@ -40,6 +40,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rupeshbhurke.househunter.R
 import com.rupeshbhurke.househunter.core.data.repo.EntrySummary
 import com.rupeshbhurke.househunter.core.util.FieldFormat
+import com.rupeshbhurke.househunter.ui.components.MediaThumbnail
 import com.rupeshbhurke.househunter.ui.components.RatingStars
 import com.rupeshbhurke.househunter.ui.components.StatusChip
 
@@ -100,14 +101,18 @@ private fun EntryCard(summary: EntrySummary, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Placeholder until photos arrive in a later milestone.
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Outlined.Apartment, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            val cover = summary.cover
+            if (cover != null) {
+                MediaThumbnail(cover, size = 64.dp)
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(Icons.Outlined.Apartment, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
+                }
             }
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(entry.title, style = MaterialTheme.typography.titleMedium, maxLines = 1, overflow = TextOverflow.Ellipsis)

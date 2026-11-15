@@ -68,6 +68,30 @@
     <string name="location_error_no_fix">Couldn\'t get a location. Check that location is turned on and try again outside.</string>
     <string name="location_error_permission">Location permission is needed. You can allow it in the app\'s settings.</string>
 
+    <!-- Media and capture -->
+    <string name="media_title">Photos &amp; videos</string>
+    <string name="media_title_count">Photos &amp; videos (%1$d)</string>
+    <string name="media_capture">Take photo or video</string>
+    <string name="media_delete_title">Delete this item?</string>
+    <string name="media_delete_body">The file will be removed from this phone. This can\'t be undone.</string>
+    <string name="media_add_caption">Add a caption</string>
+    <string name="media_edit_caption">Edit caption</string>
+    <string name="media_caption_label">Caption</string>
+    <string name="media_audio_unsupported">Audio recordings play from the notes list.</string>
+    <string name="capture_permission_needed">Camera access is needed to take photos and videos.</string>
+    <string name="capture_grant">Allow camera</string>
+    <string name="capture_close">Close camera</string>
+    <string name="capture_flip">Switch camera</string>
+    <string name="capture_photo">Photo</string>
+    <string name="capture_video">Video</string>
+    <string name="capture_take_photo">Take photo</string>
+    <string name="capture_record">Start recording</string>
+    <string name="capture_stop">Stop recording</string>
+    <plurals name="capture_saved_count">
+        <item quantity="one">%d saved</item>
+        <item quantity="other">%d saved</item>
+    </plurals>
+
     <!-- Add field dialog -->
     <string name="add_field_title">Add field</string>
     <string name="add_field_label">Field name</string>
