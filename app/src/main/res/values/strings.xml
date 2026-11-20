@@ -111,6 +111,8 @@
     <string name="edit_discard_title">Discard changes?</string>
     <string name="edit_discard_body">Your edits to this flat haven\'t been saved.</string>
     <string name="edit_rate_stars">Rate %1$d of 5</string>
+    <string name="rating_stars_rated">Rated %1$d of 5</string>
+    <string name="rating_stars_not_rated">Not rated</string>
 
     <!-- Location -->
     <string name="location_title">Location</string>
