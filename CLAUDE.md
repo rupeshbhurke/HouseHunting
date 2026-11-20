@@ -52,6 +52,8 @@ Skip that and the gate fails with a bare `AssertionError` from the snapshot test
 
 Write new tests by extending `SnapshotTest` (`app/src/test/java/.../ui/SnapshotTest.kt`), which wraps content in the real theme with `dynamicColor = false` so goldens stay deterministic across machines. Only stateless composables can be captured: anything calling `hiltViewModel()` needs splitting into a stateful wrapper plus a stateless `...Content(state, callbacks)` first. Covered today: `StatusChip`, `RatingStars`, `EntryCard`, each in light and dark.
 
+Non-visual Compose behaviour (semantics, sizes, clicks) is tested on the JVM the same way, with Robolectric and `createComposeRule()` but no capture and no `SnapshotTest` base; `RatingStarsSemanticsTest` is the example.
+
 ## Architecture
 
 Single `:app` module, package-by-feature under `com.rupeshbhurke.househunter`: `core/{data,media,location,util}` + `feature/*` + `navigation` + `share` + `ui`. MVVM + repositories, Hilt, Coroutines/Flow, Compose Material 3, single Activity.
