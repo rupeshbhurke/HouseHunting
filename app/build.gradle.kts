@@ -70,6 +70,13 @@ room {
     schemaDirectory("$projectDir/schemas")
 }
 
+roborazzi {
+    // Goldens are committed, so they must live outside the gitignored build
+    // folder: a golden that is not tracked silently re-records and detects
+    // nothing. factory/checks.sh compares against these on every job.
+    outputDir.set(file("src/test/screenshots"))
+}
+
 secrets {
     // Real keys live in the git-ignored secrets.properties; the defaults file holds placeholders.
     propertiesFileName = "secrets.properties"

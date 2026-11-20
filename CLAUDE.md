@@ -30,10 +30,27 @@ Gradle wrapper, JDK 17, Android SDK platform 36 (`local.properties` → `sdk.dir
 **Validation** — one command, matching `factory/checks.sh`:
 
 ```bash
-./gradlew --console=plain lintDebug testDebugUnitTest assembleDebug
+./gradlew --console=plain lintDebug verifyRoborazziDebug assembleDebug
 ```
 
+`verifyRoborazziDebug` *is* `testDebugUnitTest` with screenshot verification switched on, so it runs the whole unit test suite — don't run both.
+
 `connectedAndroidTest` is deliberately outside it (needs a device or emulator). Run it by hand before merging anything that touches Room entities, migrations or repositories.
+
+## Screenshot tests
+
+Compose renders to PNG on the JVM through Roborazzi — no emulator. Goldens are **committed** in `app/src/test/screenshots/`, and `verifyRoborazziDebug` fails on any visual change that wasn't re-recorded.
+
+**If you change the UI on purpose, re-record and commit the new goldens in the same change:**
+
+```bash
+./gradlew recordRoborazziDebug     # rewrites app/src/test/screenshots/
+git add app/src/test/screenshots/
+```
+
+Skip that and the gate fails with a bare `AssertionError` from the snapshot test — that failure means "the UI moved and nobody re-recorded", not that the code is broken.
+
+Write new tests by extending `SnapshotTest` (`app/src/test/java/.../ui/SnapshotTest.kt`), which wraps content in the real theme with `dynamicColor = false` so goldens stay deterministic across machines. Only stateless composables can be captured: anything calling `hiltViewModel()` needs splitting into a stateful wrapper plus a stateless `...Content(state, callbacks)` first. Covered today: `StatusChip`, `RatingStars`, `EntryCard`, each in light and dark.
 
 ## Architecture
 

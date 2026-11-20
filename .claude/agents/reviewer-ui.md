@@ -27,14 +27,46 @@ is in the main checkout; your one file goes there.
 3. The change: `git log --oneline <base>..HEAD` and `git diff <base>...HEAD`.
 4. The styling the change should match: `ui/theme/Theme.kt`, the shared widgets
    in `ui/components/`, and the neighbouring screens under `feature/`.
+5. The goldens the branch touched under `app/src/test/screenshots/`, as images.
+   See **Look at it**.
 5. From round 2 on, your own review from the last round that had reviews
    (`round-<M>/review-ui.md`). Check whether each finding was fixed.
 
 ## Look at it
 
 This is an Android app, not a web app: there is no dev server to start and no
-browser to drive, so ignore any port your prompt gives you. Read the Compose
-code instead, against the app's own design system:
+browser to drive, so ignore any port your prompt gives you. You look at rendered
+screenshots instead, and then read the Compose code behind them.
+
+**The screenshots.** Goldens are committed PNGs under
+`app/src/test/screenshots/`, rendered on the JVM by Roborazzi. The gate has
+already run `verifyRoborazziDebug`, so the goldens on the branch match its code:
+a visual change appears as a changed or added golden, never as a leftover diff
+image. Find what moved:
+
+```bash
+cd <worktree> && git diff --name-status <base>...HEAD -- 'app/src/test/screenshots/*.png'
+```
+
+For each modified (`M`) golden, write the old version somewhere gitignored and
+open both, so you are comparing before against after rather than guessing:
+
+```bash
+cd <worktree> && mkdir -p app/build/review && \
+  git show <base>:<the path> > app/build/review/before.png
+```
+
+Then Read `<worktree>/app/build/review/before.png` and the golden itself. For an
+added (`A`) golden there is nothing to compare against, so just open it. Open
+the dark-theme goldens too: several widgets have a `_dark` pair, and a colour
+that only works in light mode shows up nowhere else.
+
+**If the branch changes the UI but no golden moved**, say so under Findings.
+Either the change has no screenshot test covering it, or it is on a screen still
+too coupled to `hiltViewModel()` to capture. Name which, and which widget or
+screen is uncovered.
+
+**The code**, for what a still image cannot show, against the design system:
 
 - `ui/theme/Theme.kt`: the Material 3 colour scheme, typography and shapes.
   Colour, type and shape must come from `MaterialTheme.colorScheme`,
@@ -47,6 +79,9 @@ code instead, against the app's own design system:
   conventions the change should match.
 
 ## What to look for
+
+Judge from the images first and the code second: a golden shows what actually
+renders, while the code only shows what was intended.
 
 - It looks like it belongs in the app: the same colours, type scale, spacing,
   corner radii and elevation as the screens around it.

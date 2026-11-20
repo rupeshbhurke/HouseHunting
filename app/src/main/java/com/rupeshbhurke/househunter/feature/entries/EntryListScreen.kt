@@ -238,7 +238,7 @@ private fun SearchField(value: String, onChange: (String) -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun EntryCard(
+internal fun EntryCard(
     summary: EntrySummary,
     distances: List<Pair<ReferencePointEntity, Double>>,
     selecting: Boolean,

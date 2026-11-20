@@ -7,3 +7,5 @@ gradlew text eol=lf
 # git worktree, and CRLF would break every shebang and `bash checks.sh`.
 factory/checks.sh text eol=lf
 factory/bin/* text eol=lf
+# Screenshot goldens are compared byte-for-byte; never let EOL conversion near them.
+*.png binary

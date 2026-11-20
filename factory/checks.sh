@@ -31,9 +31,15 @@ fi
 # Lint, unit tests and the debug build, in one Gradle invocation so the
 # configuration phase runs once.
 #
+# verifyRoborazziDebug runs the WHOLE unit test suite (it is testDebugUnitTest
+# with verification switched on), so it replaces testDebugUnitTest rather than
+# joining it. On top of the normal tests it renders the screenshot tests and
+# compares them against the committed goldens in app/src/test/screenshots/,
+# failing on any visual change that was not re-recorded.
+#
 # connectedAndroidTest is deliberately absent: it needs a running emulator or
 # device, so it is neither deterministic nor non-interactive. That leaves the
 # Room migration test and the repository/DAO tests outside the gate - run
 # `./gradlew connectedAndroidTest` by hand before merging a change that touches
 # entities, migrations or repositories.
-./gradlew --console=plain lintDebug testDebugUnitTest assembleDebug
+./gradlew --console=plain lintDebug verifyRoborazziDebug assembleDebug
