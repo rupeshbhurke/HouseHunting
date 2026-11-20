@@ -2,3 +2,8 @@
 gradlew text eol=lf
 *.bat text eol=crlf
 *.jar binary
+
+# The factory's scripts must stay LF and executable: each job runs in a fresh
+# git worktree, and CRLF would break every shebang and `bash checks.sh`.
+factory/checks.sh text eol=lf
+factory/bin/* text eol=lf
