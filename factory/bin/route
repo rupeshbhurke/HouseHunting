@@ -26,8 +26,10 @@ def main(argv):
     if len(argv) != 1:
         die("usage: route <job-id>")
     job_id = argv[0]
-    job_bin = str(FACTORY / "bin" / "job")
-    res = subprocess.run([job_bin, "sync", job_id], capture_output=True, text=True)
+    # Run job through sys.executable, not as a bare path: Windows cannot exec an
+    # extensionless script through its shebang.
+    job_cmd = [sys.executable, str(FACTORY / "bin" / "job")]
+    res = subprocess.run([*job_cmd, "sync", job_id], capture_output=True, text=True)
     if res.returncode != 0:
         die(res.stderr.strip())
     job = json.loads((FACTORY / "jobs" / job_id / "job.json").read_text())
@@ -41,7 +43,7 @@ def main(argv):
             die(f"surface {surface!r} isn't in config.json surface_reviewers ({', '.join(CONFIG['surface_reviewers'])})")
         reviewers.update(extra)
     agents = {"reviewers": reviewers}
-    res = subprocess.run([job_bin, "agents", job_id, json.dumps(agents)], capture_output=True, text=True)
+    res = subprocess.run([*job_cmd, "agents", job_id, json.dumps(agents)], capture_output=True, text=True)
     if res.returncode != 0:
         die(res.stderr.strip())
     print(f"{job_id}: reviewers " + ", ".join(f"{k} {v}" for k, v in reviewers.items()))
