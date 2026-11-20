@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
     alias(libs.plugins.secrets)
+    alias(libs.plugins.roborazzi)
 }
 
 android {
@@ -50,6 +51,13 @@ android {
     }
     // Exported Room schemas let the migration test open old database versions.
     sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    testOptions {
+        // Roborazzi renders real Compose UI on the JVM through Robolectric, which
+        // needs the merged Android resources to resolve themes and strings.
+        unitTests {
+            isIncludeAndroidResources = true
+        }
+    }
 }
 
 kotlin {
@@ -109,6 +117,13 @@ dependencies {
     implementation(libs.coil.video)
 
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(libs.roborazzi.junit.rule)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
