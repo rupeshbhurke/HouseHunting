@@ -40,6 +40,14 @@ android {
         compose = true
         buildConfig = true
     }
+    lint {
+        // Records the lint issues that already existed, so the factory gate
+        // (factory/checks.sh) fails only on new ones. Both baselined entries
+        // are false positives: a permission check lint can't trace through the
+        // Context.has() helper, and a NotificationPermission warning raised by
+        // Glide, a transitive dependency this app never calls.
+        baseline = file("lint-baseline.xml")
+    }
     // Exported Room schemas let the migration test open old database versions.
     sourceSets.getByName("androidTest").assets.srcDir("$projectDir/schemas")
 }
