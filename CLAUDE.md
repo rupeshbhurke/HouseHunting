@@ -88,6 +88,12 @@ intake → spec → build → gate → review → approve, one PR per issue. Sta
 `factory/checks.sh`. Dashboard: `cd factory && python3 -m http.server`, then
 open http://localhost:8000/dashboard.html.
 
+While the factory is being trialled its base is the `software-factory` branch,
+not `main` (`base_branch` in `factory/config.json`). Jobs branch from
+`origin/software-factory` and their PRs merge back into it, so nothing the
+factory produces reaches `main` until that branch is merged by hand. Point
+`base_branch` at `main` to change that.
+
 Each job works in its own git worktree, a full checkout of the repo at
 `.worktrees/<job-id>` (gitignored). A tool run from the repo root that doesn't
 read `.gitignore` sees those copies too; exclude `.worktrees/` in its config.
